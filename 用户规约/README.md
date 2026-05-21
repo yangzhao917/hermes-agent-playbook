@@ -10,14 +10,6 @@
 | 日历 timestamp 用秒级 Unix | `start_time.timestamp` / `end_time.timestamp` 是秒级 | lark-cli skill |
 | 任务 due 用毫秒级 | `due.timestamp` 是毫秒级（×1000） | lark-cli skill |
 
-## 文档命名类
-
-| 规约 | 说明 | 来源 |
-|------|------|------|
-| 复盘文档命名格式 | `YYYY-MM-DD-复盘总结`（文件名=唯一标识，不可推测） | 踩坑记录 |
-| 文档内容更新用 overwrite | `lark-cli docs +update --mode overwrite` 全量覆盖，不累积版本 | 规范 |
-| 禁止创建 .md FILE 类型 | 统一用飞书原生文档（DOCX） | 用户明确要求 |
-
 ---
 
 > **已移出：**
