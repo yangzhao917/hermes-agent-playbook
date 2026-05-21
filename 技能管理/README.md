@@ -17,15 +17,11 @@
 
 存放在 `技能管理/skills/` 目录下，随本手册一并维护。
 
-### friend-social-review
-
-**功能**：以朋友口吻帮你复盘人际关系中的纠结事。不讲大道理，直接说人话。融合 5 本经典人际著作的底层逻辑，一对一交友场景的实战复盘。
-
-**定位**：不是专家/老师/心理医生，而是站在你这边帮你分析的朋友。直接给结论，不展开推理，不给背景说明。如果太敏感、太上头、投入太多，会直接说。
-
-**触发**：用户描述一段关系里的经历，请求分析时自动加载。
-
-**文件**：`技能管理/skills/friend-social-review/`
+| 技能 | 功能 | 触发场景 | 文件 |
+|------|------|----------|------|
+| friend-social-review | 以朋友口吻复盘人际关系纠结事 | 用户描述关系经历并请求分析 | [skills/friend-social-review/](skills/friend-social-review/) |
+| daily-review | 每日复盘总结生成与管理 | 「写复盘」「生成复盘」「今日总结」 | [skills/daily-review.md](skills/daily-review.md) |
+| morning-reminder | 每日晨间日程提醒（7:00） | cron 自动触发、用户问「今天有什么安排」 | [skills/morning-reminder.md](skills/morning-reminder.md) |
 
 ## 推荐开源技能
 
