@@ -7,6 +7,12 @@ version: 1.0.0
 
 # 每日复盘
 
+## 安装
+
+```bash
+python3 skills/daily-review/install.py
+```
+
 ## 存放位置
 
 复盘文档必须放在飞书云空间 `hermesAgent/每日复盘/` 文件夹下，不得放云空间根目录。

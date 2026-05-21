@@ -35,19 +35,26 @@
 ```
 hermes-agent-playbook/
 ├── README.md
-├── scripts/                # 通用脚本（供 cron 调用）
-│   └── memory_cleanup.py
 ├── 飞书/                  # 平台文档 + 所有飞书 skill
 │   ├── README.md          # Token、folder结构、联动规则
 │   ├── feishu-task/
 │   ├── feishu-calendar/
 │   └── feishu-cli/
 ├── 微信/                  # 微信平台文档
-├── skills/                # 通用 skill（不依赖特定平台）
-│   ├── friend-social-review/
+├── skills/                # 独立 skill（每个含脚本 + 安装脚本）
+│   ├── memory-cleanup/
+│   │   ├── SKILL.md
+│   │   ├── scripts/memory_cleanup.py
+│   │   └── install.py
 │   ├── morning-reminder/
+│   │   ├── SKILL.md
+│   │   ├── scripts/morning_reminder.py
+│   │   └── install.py
 │   ├── daily-review/
-│   └── memory-cleanup.md
+│   │   ├── SKILL.md
+│   │   ├── scripts/daily_review.py
+│   │   └── install.py
+│   └── friend-social-review/
 ├── 定时任务/              # cron 规范（跨平台通用）
 ├── 用户规约/              # 用户偏好（跨平台通用）
 └── 配置指南/              # 环境配置（跨平台通用）

@@ -7,6 +7,12 @@ version: 1.0.0
 
 # 每日晨间日程提醒
 
+## 安装
+
+```bash
+python3 skills/morning-reminder/install.py
+```
+
 ## 触发时间
 每天 07:00
 
