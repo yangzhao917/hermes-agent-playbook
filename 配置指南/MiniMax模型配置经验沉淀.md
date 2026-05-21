@@ -2,7 +2,7 @@
 
 ## 一、背景
 
-Hermes Agent 主模型为 MiniMax\-M2\.7（MiniMax\-CN），备用模型为 DeepSeek V4 Flash。
+Hermes Agent 主模型为 MiniMax-M2.7（MiniMax-CN），备用模型为 DeepSeek V4 Flash。
 
 ## 二、⚠️ 重要：MiniMax 国际版 vs 中国版
 
@@ -42,7 +42,7 @@ API 地址
 </td>
 <td>
 
-`https://api\.minimax\.chat/v1`
+`https://api.minimax.chat/v1`
 
 </td>
 <td>
@@ -59,12 +59,12 @@ API 地址
 </td>
 <td>
 
-`minimax\-cn`
+`minimax-cn`
 
 </td>
 <td>
 
-`https://api\.minimaxi\.com/v1`
+`https://api.minimaxi.com/v1`
 
 </td>
 <td>
@@ -75,9 +75,9 @@ API 地址
 </tr>
 </tbody></table>
 
-当前使用**中国版**（`minimax\-cn`）。
+当前使用**中国版**（`minimax-cn`）。
 
-## 三、主模型：MiniMax\-M2\.7（中国版）
+## 三、主模型：MiniMax-M2.7（中国版）
 
 <table><tbody>
 <tr>
@@ -100,7 +100,7 @@ API 地址
 </td>
 <td>
 
-MiniMax\-M2\.7
+MiniMax-M2.7
 
 </td>
 </tr>
@@ -112,7 +112,7 @@ Provider
 </td>
 <td>
 
-minimax\-cn
+minimax-cn
 
 </td>
 </tr>
@@ -124,7 +124,7 @@ API 地址
 </td>
 <td>
 
-`https://api\.minimaxi\.com/v1`
+`https://api.minimaxi.com/v1`
 
 </td>
 </tr>
@@ -182,7 +182,7 @@ API Key
 
 - 文本生成（编程与 Agent SOTA）
 
-- 视频生成（Hailuo 2\.3，1080p）
+- 视频生成（Hailuo 2.3，1080p）
 
 - 语音合成（40语言，实时响应）
 
@@ -219,7 +219,7 @@ API Key
 </td>
 <td>
 
-deepseek\-v4\-flash
+deepseek-v4-flash
 
 </td>
 </tr>
@@ -243,7 +243,7 @@ API 地址
 </td>
 <td>
 
-`https://api\.deepseek\.com`
+`https://api.deepseek.com`
 
 </td>
 </tr>
@@ -322,7 +322,7 @@ API Key
 
 ## 七、配置文件位置
 
-`\~/\.hermes/config\.yaml`
+`~/.hermes/config.yaml`
 
 关键配置项：
 
