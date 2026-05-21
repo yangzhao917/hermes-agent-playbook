@@ -1,7 +1,5 @@
 # MiniMax 模型配置经验沉淀
 
-# MiniMax 模型配置经验沉淀
-
 ## 一、背景
 
 Hermes Agent 主模型为 MiniMax\-M2\.7（MiniMax\-CN），备用模型为 DeepSeek V4 Flash。
