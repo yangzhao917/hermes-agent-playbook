@@ -63,3 +63,9 @@ python3 /home/ubuntu/skills/feishu-task/scripts/stats.py
 ## 具体命令
 
 所有具体操作命令见 `lark-cli` skill（`skill_view lark-cli`）和 `feishu-task` skill（`skill_view feishu-task`）。
+
+## 横向规范
+
+- [定时任务规范](../定时任务/README.md)
+- [用户偏好](../用户规约/README.md)
+- [环境配置](../配置指南/README.md)

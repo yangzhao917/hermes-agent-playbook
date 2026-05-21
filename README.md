@@ -13,13 +13,19 @@
 ```
 hermes-agent-playbook/
 ├── README.md
-├── 飞书/               # 文档、待办、日历、Token 架构规范
-├── 微信/               # 消息队列、意图识别、多任务处理
-├── 定时任务/           # cron 配置规范、复盘机制
-├── 用户规约/           # 用户偏好、硬规矩、踩坑记录
-├── 配置指南/           # 初始化配置、更新、新功能
-├── 技能管理/           # Skill 评估与调用原则
-└── 脚本/               # 实用脚本
+├── 飞书/                  # 平台文档 + 所有飞书 skill
+│   ├── README.md          # Token、folder结构、联动规则
+│   ├── feishu-task/
+│   ├── feishu-calendar/
+│   └── feishu-cli/
+├── 微信/                  # 微信平台文档
+├── skills/                # 通用 skill（不依赖特定平台）
+│   ├── friend-social-review/
+│   ├── morning-reminder/
+│   └── daily-review/
+├── 定时任务/              # cron 规范（跨平台通用）
+├── 用户规约/              # 用户偏好（跨平台通用）
+└── 配置指南/              # 环境配置（跨平台通用）
 ```
 
 ---
@@ -28,12 +34,12 @@ hermes-agent-playbook/
 
 | 目录 | 内容 |
 |------|------|
-| [飞书](./飞书/README.md) | 文档/日历/待办架构规范、Token管理 |
-| [微信](./微信/README.md) | 消息队列机制、意图识别与分发规则 |
+| [飞书](./飞书/README.md) | 飞书平台规范（Token管理、日历/任务联动） |
+| [微信](./微信/README.md) | 微信消息队列、意图识别、分发规则 |
 | [定时任务](./定时任务/README.md) | cron 架构规范、复盘总结模板 |
 | [用户规约](./用户规约/README.md) | 用户偏好、飞书操作规范、时间计算规范 |
 | [配置指南](./配置指南/README.md) | 安装配置、更新、新功能说明 |
-| [技能管理](./技能管理/README.md) | Skill 评估与调用原则 |
+| [skills](./skills/) | 通用 skill（morning-reminder、daily-review、friend-social-review） |
 
 ---
 
