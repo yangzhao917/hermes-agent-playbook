@@ -2,40 +2,25 @@
 """
 每日复盘总结生成 — cron wrapper script
 由 install.py 安装到 ~/.hermes/scripts/daily_review.py
-
-依赖: lark-cli
-
-文档创建流程:
-1. 确保文件夹 hermesAgent/每日复盘/ 存在（自动创建）
-2. 搜索当天是否已有文档
-3. 有 → 覆盖内容; 无 → 创建新文档
-4. 输出摘要供 deliver 使用
 """
 import subprocess
 import json
 import sys
-from datetime import datetime, timezone, timedelta
+from pathlib import Path
+
+# 共享 lib 在 skills/lib/
+sys.path.insert(0, str(Path(__file__).parent / "lib"))  # lib: ~/.hermes/scripts/lib/
+
+from cron import get_cst_now, get_date_range, lark_calendar_agenda, format_event_time
 
 FEISHU_FOLDER = "{{FEISHU_FOLDER}}"  # 安装时自动替换
 
-def get_today_str():
-    return datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
 
-def api(method, path, data=None):
-    """调用 lark-cli API。"""
-    cmd = ["lark-cli", "api", method, path]
-    if data:
-        cmd += ["--data", json.dumps(data)]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        return None
-    try:
-        return json.loads(result.stdout)
-    except json.JSONDecodeError:
-        return None
+def get_today_str():
+    return get_cst_now().strftime("%Y-%m-%d")
+
 
 def get_folder_token(folder_name: str, parent_token: str = None) -> str | None:
-    """列出文件夹内容，返回同名文件夹的 token。"""
     cmd = ["lark-cli", "drive", "+list", "--format", "json"]
     if parent_token:
         cmd += ["--folder-token", parent_token]
@@ -51,8 +36,8 @@ def get_folder_token(folder_name: str, parent_token: str = None) -> str | None:
         pass
     return None
 
+
 def create_folder(name: str, parent_token: str = None) -> str | None:
-    """创建文件夹，返回 folder_token。"""
     cmd = ["lark-cli", "drive", "+create-folder", "--name", name, "--format", "json"]
     if parent_token:
         cmd += ["--folder-token", parent_token]
@@ -65,9 +50,8 @@ def create_folder(name: str, parent_token: str = None) -> str | None:
     except (json.JSONDecodeError, KeyError):
         return None
 
+
 def ensure_folder_structure() -> str | None:
-    """确保 hermesAgent/每日复盘/ 文件夹存在，返回最终 folder_token。"""
-    # 尝试逐级获取或创建
     hermes_token = get_folder_token("hermesAgent")
     if not hermes_token:
         hermes_token = create_folder("hermesAgent")
@@ -84,9 +68,10 @@ def ensure_folder_structure() -> str | None:
 
     return daily_token
 
+
 def search_docs(query: str, folder_token: str = None) -> list:
-    """搜索文档。"""
-    cmd = ["lark-cli", "docs", "+search", "--query", query, "--format", "json", "--doc-types", "docx"]
+    cmd = ["lark-cli", "docs", "+search", "--query", query,
+           "--format", "json", "--doc-types", "docx"]
     if folder_token:
         cmd += ["--folder-tokens", folder_token]
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -98,10 +83,11 @@ def search_docs(query: str, folder_token: str = None) -> list:
     except json.JSONDecodeError:
         return []
 
+
 def create_doc(title: str, folder_token: str) -> str | None:
-    """创建文档，返回 doc_id。"""
     result = subprocess.run(
-        ["lark-cli", "docs", "+create", "--title", title, "--folder-token", folder_token, "--format", "json"],
+        ["lark-cli", "docs", "+create",
+         "--title", title, "--folder-token", folder_token, "--format", "json"],
         capture_output=True, text=True
     )
     if result.returncode != 0:
@@ -112,46 +98,22 @@ def create_doc(title: str, folder_token: str) -> str | None:
     except (json.JSONDecodeError, KeyError):
         return None
 
+
 def update_doc(doc_id: str, markdown: str):
-    """更新文档内容。"""
     result = subprocess.run(
-        ["lark-cli", "docs", "+update", "--doc", doc_id, "--markdown", markdown, "--mode", "overwrite"],
+        ["lark-cli", "docs", "+update",
+         "--doc", doc_id, "--markdown", markdown, "--mode", "overwrite"],
         capture_output=True, text=True
     )
     return result.returncode == 0
 
-def get_calendar_events() -> list:
-    """获取今日日历事件（用于参考）。"""
-    today = datetime.now(timezone(timedelta(hours=8)))
-    date_str = today.strftime("%Y-%m-%d")
-    start = f"{date_str}T00:00:00+08:00"
-    end = f"{date_str}T23:59:59+08:00"
-    result = subprocess.run(
-        ["lark-cli", "calendar", "+agenda", "--start", start, "--end", end, "--format", "json"],
-        capture_output=True, text=True
-    )
-    if result.returncode != 0:
-        return []
-    try:
-        data = json.loads(result.stdout)
-        return data if isinstance(data, list) else []
-    except json.JSONDecodeError:
-        return []
 
 def build_markdown(date_str: str, events: list) -> str:
-    """生成复盘文档的 Markdown 内容。"""
     event_lines = []
     if events:
         for ev in events:
             title = ev.get("summary") or ev.get("title") or "无标题"
-            start_val = ev.get("start") or ""
-            time_str = ""
-            if start_val:
-                try:
-                    dt = datetime.fromisoformat(start_val.replace("Z", "+00:00"))
-                    time_str = dt.strftime("%H:%M")
-                except ValueError:
-                    pass
+            time_str = format_event_time(ev.get("start") or "")
             event_lines.append(f"- {time_str} {title}" if time_str else f"- {title}")
 
     lines = [
@@ -200,33 +162,31 @@ def build_markdown(date_str: str, events: list) -> str:
 
     return "\n".join(lines)
 
+
 def main():
     date_str = get_today_str()
     print(f"正在生成 {date_str} 的复盘...", file=sys.stderr)
 
-    # 确保文件夹存在
     folder_token = ensure_folder_structure()
     if not folder_token:
         print("无法获取文件夹，退出", file=sys.stderr)
         sys.exit(1)
     print(f"文件夹 token: {folder_token}", file=sys.stderr)
 
-    # 搜索当天文档
     existing = search_docs(date_str, folder_token)
     doc_id = None
     for doc in existing:
         title = doc.get("title", "")
         if date_str in title:
-            doc_id = doc.get("doc_id") or doc.get("document_id") or doc.get("document", {}).get("document_id")
+            doc_id = (doc.get("doc_id") or doc.get("document_id")
+                      or doc.get("document", {}).get("document_id"))
             break
 
-    # 获取日历参考
-    events = get_calendar_events()
+    _, today_start, today_end = get_date_range(0)
+    events = lark_calendar_agenda(today_start, today_end)
 
-    # 生成内容
     markdown = build_markdown(date_str, events)
 
-    # 创建或更新文档
     if doc_id:
         print(f"找到已有文档: {doc_id}，将覆盖内容", file=sys.stderr)
     else:
@@ -244,7 +204,6 @@ def main():
 
     print(f"文档已保存: {doc_id}", file=sys.stderr)
 
-    # 输出摘要（供 deliver 使用）
     print(f"\n✅ {date_str} 复盘已完成")
     print(f"\n飞书文档已更新: {FEISHU_FOLDER}{date_str}-复盘总结")
     if events:
@@ -254,6 +213,7 @@ def main():
             print(f"  • {title}")
     else:
         print("\n（今日无日历事件）")
+
 
 if __name__ == "__main__":
     main()
