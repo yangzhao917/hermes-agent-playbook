@@ -16,8 +16,8 @@
 |------|------|------|
 | 飞书操作走 lark-cli skill | 所有任务/日历/文档/云空间操作必须先 skill_view(name='lark-cli')，禁止凭记忆敲命令 | 硬规矩 |
 | 飞书用 user_access_token | 所有操作必须用用户身份，不能用 bot/应用身份 | 硬规矩 |
-| 文档创建在用户空间 | 用 `lark-cli docs +create`（transfer_ownership=true）再写入内容 | 硬规矩 |
-| 文件操作加 --user-access-token | mkdir/move/shortcut 等命令必须带此参数，否则落在 app 空间 | 踩坑记录 |
+| 文档创建在用户空间 | 用 `lark-cli docs +create --folder-token <FOLDER_TOKEN>`（默认 user 身份创建在用户空间） | 硬规矩 |
+| 文件操作加身份参数 | `mkdir/move/shortcut` 等命令用 `--as user` 指定身份，否则可能落在 app 空间 | 踩坑记录 |
 | 任务创建必须加 --assignee | 否则用户在飞书看不到任务 | 踩坑记录 |
 | event_id 必须用完整值 | 从 JSON 响应直接提取，不用终端显示的截断版 | 踩坑记录 |
 
