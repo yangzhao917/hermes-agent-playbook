@@ -49,7 +49,7 @@ API 地址
 </td>
 <td>
 
-`MINIMAX\_API\_KEY`
+`MINIMAX_API_KEY`
 
 </td>
 </tr>
@@ -71,7 +71,7 @@ API 地址
 </td>
 <td>
 
-`MINIMAX\_CN\_API\_KEY`
+`MINIMAX_CN_API_KEY`
 
 </td>
 </tr>
@@ -138,7 +138,7 @@ API 地址
 </td>
 <td>
 
-`MINIMAX\_CN\_API\_KEY`
+`MINIMAX_CN_API_KEY`
 
 </td>
 </tr>
