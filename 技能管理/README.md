@@ -2,7 +2,16 @@
 
 > Skill 评估原则与安装管理
 
-## 技能评估原则
+## 技能调用原则
+
+**不需要每次都 load skill**：熟悉稳定的 skill（如 feishu-task）直接调脚本，skill 文档只是参考。
+
+**何时 load skill：**
+- 新装的 / 久未用的 skill → 先 `skill_view` 确认参数和坑点
+- 复杂操作流程（lark-cli、mmx-cli 等）→ 先加载了解 API 限制再执行
+- 纯文档型 skill（friend-social-review、writing-polish 等）→ 需要读逻辑才能做事，必须加载
+
+**防止"我以为我记得"：** 定期核对 skill 文档有没有更新，不确定时先查再执行。
 
 - **不能仅凭名字/描述判断冗余**：需加载实际内容后再下结论
 - **技能不占空间**：不确定时留着比删了好
