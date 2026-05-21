@@ -8,6 +8,27 @@
 
 ---
 
+## 快速上手
+
+**首次阅读顺序（建议）：**
+
+1. [用户规约](./用户规约/README.md) — 必读，了解助手的行为规则
+2. [飞书](./飞书/README.md) — 了解飞书文档/日历/任务的存放规范和 Token 管理
+3. [定时任务](./定时任务/README.md) — 了解每日复盘生成和晨间提醒的机制
+4. [skills](./skills/) — 根据需要查阅具体 skill 文档
+
+**常见操作对应的文档：**
+
+| 操作 | 文档 |
+|------|------|
+| 创建飞书任务 | [feishu-task](../飞书/feishu-task/SKILL.md) |
+| 查看飞书日历 | [feishu-calendar](../飞书/feishu-calendar/SKILL.md) |
+| 写每日复盘 | [daily-review](./skills/daily-review.md) |
+| 飞书 Token 续期 | [飞书 README - Token 管理](./飞书/README.md#token-管理) |
+| 查看 cron 任务 | [定时任务](./定时任务/README.md) |
+
+---
+
 ## 内容结构（按场景）
 
 ```

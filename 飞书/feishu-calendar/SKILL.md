@@ -13,8 +13,10 @@ category: productivity
 
 ## 脚本目录
 
+> 本地开发路径：`/home/ubuntu/skills/feishu-calendar/scripts/`，playbook 仓库仅含 SKILL.md
+
 ```
-/home/ubuntu/skills/feishu-calendar/scripts/
+scripts/
 ├── list_events.py    # 查看日程（--today/--tomorrow/--this-week/--next-week/--range）
 ├── get_event.py     # 查看单条日程详情
 ├── create_event.py  # 创建日程
@@ -23,24 +25,26 @@ category: productivity
 
 ## 调用方式
 
+> 脚本位于本地开发路径（`/home/ubuntu/skills/feishu-calendar/scripts/`）
+
 ```bash
 # 查看今天日程
-/home/ubuntu/skills/feishu-calendar/scripts/list_events.py --today
+python3 list_events.py --today
 
 # 查看本周日程
-/home/ubuntu/skills/feishu-calendar/scripts/list_events.py --this-week
+python3 list_events.py --this-week
 
 # 查看指定日期范围
-/home/ubuntu/skills/feishu-calendar/scripts/list_events.py --range 2026-05-20 2026-05-25
+python3 list_events.py --range 2026-05-20 2026-05-25
 
 # 查看单条日程详情
-/home/ubuntu/skills/feishu-calendar/scripts/get_event.py --event-id <event_id>
+python3 get_event.py --event-id <event_id>
 
 # 创建日程
-/home/ubuntu/skills/feishu-calendar/scripts/create_event.py --summary "标题" --start "2026-05-22T14:00" --end "2026-05-22T15:00"
+python3 create_event.py --summary "标题" --start "2026-05-22T14:00" --end "2026-05-22T15:00"
 
-/# 删除日程（需要 event_id）
-/home/ubuntu/skills/feishu-calendar/scripts/delete_event.py --event-id <event_id>
+# 删除日程（需要 event_id）
+python3 delete_event.py --event-id <event_id>
 ```
 
 ## 设计原则

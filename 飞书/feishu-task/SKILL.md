@@ -6,12 +6,9 @@ version: 1.0.0
 
 ## 依赖
 
-```bash
-# 安装 Python 依赖（venv 内）
-/home/ubuntu/.hermes/hermes-agent/venv/bin/pip install python-dateutil
-
-# 模糊匹配用标准库 difflib（无需安装），threshold=60
-```
+- Python 3（虚拟环境）：`~/.hermes/hermes-agent/venv/bin/python3`
+- `python-dateutil`（日期解析）：`pip install python-dateutil`
+- 模糊匹配用标准库 `difflib`（无需安装），threshold=60
 
 ## 功能清单
 
@@ -126,55 +123,57 @@ lark-cli contact +search-user --user-ids 'me' --format json
 
 ### 查看待办
 ```bash
-python3 scripts/list_tasks.py --completed=false
+python3 list_tasks.py --completed=false
 # 输出：按逾期/即将到期/无期限分组，显示前20条摘要
 
-python3 scripts/list_tasks.py --completed=false --show-all
+python3 list_tasks.py --completed=false --show-all
 # 输出：所有未完成任务详细列表
 ```
 
+> 脚本路径为本地开发路径（`/home/ubuntu/skills/feishu-task/scripts/`），playbook 仓库仅含 SKILL.md
+
 ### 创建任务
 ```bash
-python3 scripts/create_task.py --summary "整理飞书复盘文档" --due "+3d"
+python3 create_task.py --summary "整理飞书复盘文档" --due "+3d"
 # 截止日期支持：+2d（2天后）、+1w（1周后）、2026-05-25（固定日期）
 
-python3 scripts/create_task.py --summary "整理飞书复盘文档" --due "2026-05-25" --dry-run
+python3 create_task.py --summary "整理飞书复盘文档" --due "2026-05-25" --dry-run
 # dry-run 模式：预览实际 API 请求，不创建
 ```
 
 ### 完成任务（模糊匹配）
 ```bash
-python3 scripts/complete_task.py --query "CSS播客"
+python3 complete_task.py --query "CSS播客"
 # 找到匹配任务，匹配度66%以上才有效，否则提示"没找到"
 
-python3 scripts/complete_task.py --guid "e8debd23-fcf6-4c60-8f96-cf690b8203bf"
+python3 complete_task.py --guid "e8debd23-fcf6-4c60-8f96-cf690b8203bf"
 # 直接指定 guid，跳过模糊匹配
 
-python3 scripts/complete_task.py --query "CSS" --dry-run
+python3 complete_task.py --query "CSS" --dry-run
 # 预览模式，不实际完成
 ```
 
 ### 批量清理
 ```bash
-python3 scripts/batch_complete.py --overdue-only
+python3 batch_complete.py --overdue-only
 # 清理所有已逾期任务，逐个确认
 
-python3 scripts/batch_complete.py --all
+python3 batch_complete.py --all
 # 清理所有未完成任务（慎用）
 
-python3 scripts/batch_complete.py --overdue-only --no-confirm
+python3 batch_complete.py --overdue-only --no-confirm
 # 不需要确认直接执行
 ```
 
 ### 统计概览
 ```bash
-python3 scripts/stats.py
+python3 stats.py
 # 输出：本周新增/完成/逾期数、完成率、Top3 最久未完成任务
 ```
 
 ### 任务搜索
 ```bash
-python3 scripts/search_tasks.py --query "CSS播客"
+python3 search_tasks.py --query "CSS播客"
 # 支持关键词搜索，返回所有相关任务（含已完成）
 ```
 

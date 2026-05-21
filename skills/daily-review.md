@@ -19,7 +19,7 @@ version: 1.0.0
 
 每天只创建/更新一份复盘文档：
 1. 先用 Python 计算今天的日期字符串
-2. 用 `lark-cli drive +search` 在每日复盘文件夹里搜索当天日期
+2. 用 `lark-cli drive +search` 在每日复盘文件夹里搜索当天日期（`+search` 是动作命令，`drive` 是名词）
 3. 已有 → 覆盖更新（overwrite）；没有 → 创建新文档
 
 ## 文档板块（按优先级）

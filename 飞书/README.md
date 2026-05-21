@@ -2,6 +2,12 @@
 
 > 飞书文档、待办、日历的架构规范与操作原则
 
+## 必读
+
+> ⚠️ **日历查询用 `lark-cli calendar +agenda`（今天默认），不要用 `+events`**
+> 
+> ⚠️ **任务创建必须带 `--assignee`，否则用户在飞书看不到任务**
+
 ## 文档统一存放目录
 
 - **HermesAgent**（folder_token: `<FOLDER_TOKEN>`）
@@ -10,20 +16,9 @@
 
 ## 待办任务
 
-统一用 `feishu-task` skill：
+统一用 `feishu-task` skill，详见 [feishu-task/feishu-task/SKILL.md](./feishu-task/SKILL.md)。
 
-```bash
-python3 /home/ubuntu/skills/feishu-task/scripts/list_tasks.py --completed=false
-python3 /home/ubuntu/skills/feishu-task/scripts/create_task.py --summary "标题" --due "+2d"
-python3 /home/ubuntu/skills/feishu-task/scripts/complete_task.py --query "关键词"
-python3 /home/ubuntu/skills/feishu-task/scripts/stats.py
-```
-
-具体命令见 `lark-cli` skill 和 `feishu-task` skill。
-
-> ⚠️ 任务创建必须带 `--assignee`，否则用户在飞书看不到任务
-
-> ⚠️ 日历查询用 `lark-cli calendar +agenda`（今天默认），不要用 `+events`
+**lark-cli 命令前缀说明：** `+` 前缀表示「动词/动作」，如 `+create`（创建）、`+search`（搜索）、`+agenda`（日程查询）。`tasks` 子名词表示「名词/对象」，如 `tasks list`（任务列表）、`tasks delete`（删除任务）。
 
 ## 日程与待办联动规则
 
@@ -59,10 +54,6 @@ python3 /home/ubuntu/skills/feishu-task/scripts/stats.py
 | 20026 | refresh_token 过期 | 需重新 Device Flow 授权 |
 | 193003 | 事件已删除 | 忽略（幂等） |
 | 191002 | calendar 无 writer 角色 | 换用户 token |
-
-## 具体命令
-
-所有具体操作命令见 `lark-cli` skill（`skill_view lark-cli`）和 `feishu-task` skill（`skill_view feishu-task`）。
 
 ## 横向规范
 
