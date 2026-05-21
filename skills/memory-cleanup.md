@@ -9,9 +9,18 @@ version: 1.0.0
 
 ## 存放位置
 
-- 脚本：`~/.hermes/scripts/memory_cleanup.py`
+- 脚本：`scripts/memory_cleanup.py`
 - 日志：`~/.hermes/logs/memory_cleanup.jsonl`（JSON Lines）
 - 记忆文件：`~/.hermes/memories/MEMORY.md`
+
+## 安装
+
+克隆本仓库后，将脚本软链接到 `~/.hermes/scripts/`：
+
+```bash
+mkdir -p ~/.hermes/scripts
+ln -s /path/to/hermes-agent-playbook/scripts/memory_cleanup.py ~/.hermes/scripts/memory_cleanup.py
+```
 
 ## 使用方式
 

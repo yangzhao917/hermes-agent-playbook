@@ -35,6 +35,8 @@
 ```
 hermes-agent-playbook/
 ├── README.md
+├── scripts/                # 通用脚本（供 cron 调用）
+│   └── memory_cleanup.py
 ├── 飞书/                  # 平台文档 + 所有飞书 skill
 │   ├── README.md          # Token、folder结构、联动规则
 │   ├── feishu-task/
