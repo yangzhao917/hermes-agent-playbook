@@ -1,29 +1,65 @@
 ---
-name: morning-reminder
-description: 每日 07:30 推送今日+明日日历日程摘要到飞书。
+name: daily-review
+description: "Use when setting up or running a daily review workflow. Generates a structured review document in Feishu Docs, idempotent (updates existing doc by date)."
 version: 1.0.0
+author: 杨钊
+license: MIT
+metadata:
+  hermes:
+    tags: [feishu, review, daily, document, docs, idempotent]
+    requires_toolsets: [terminal]
 ---
 
-# morning-reminder
+# daily-review
 
-每日 07:30 (CST) 自动查询飞书日历，推送今日和明日日程摘要。
+每日 23:30 自动生成复盘总结文档，写入飞书 `hermesAgent/每日复盘/` 文件夹。
 
-## 安装
+## 何时使用
+
+- 用户说"设置每日复盘"、"每天自动生成复盘"
+- cron job 自动触发
+
+## 幂等性
+
+- **文档已存在**（当天已运行过）→ 覆盖内容，保留文档链接
+- **文档不存在** → 创建新文档
+- 每天只会有一条文档，文件名含日期
+
+## 使用方式
 
 ```bash
-# 首次安装
-python3 skills/morning-reminder/install.py
-
-# 预览
-python3 skills/morning-reminder/install.py --dry-run
-
-# 强制更新
-python3 skills/morning-reminder/install.py --force
+python3 ~/.hermes/skills/daily-review/scripts/daily_review.py
 ```
 
-## 版本
+## 文档结构
 
-当前版本：`1.0.0`
+```
+# YYYY-MM-DD 复盘总结
 
-版本历史：
-- `1.0.0` — 初始版本，基于 lark-cli calendar +agenda，每日两次推送
+## 📋 计划事项（必须）
+来源：昨日「明日待办」+ 今日新增计划
+| 时间 | 事项 | 备注 |
+
+## ✅ 完成情况（必须）
+| 完成 | 未完成 | 调整 |
+
+## ⏰ 明日待办（必须）
+| 时间 | 事项 | 备注 |
+
+## 📌 待跟进
+带紧迫度标注（🔴🟡🟢）
+
+## 📅 后续安排
+| 日期 | 事项 |
+
+## 💡 今天学到的（建议）
+
+## ⚡ 今日高光/感受（选填）
+```
+
+## 验证
+
+```bash
+python3 ~/.hermes/skills/daily-review/scripts/daily_review.py
+# 应在飞书创建或更新当天复盘文档
+```

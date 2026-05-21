@@ -1,23 +1,41 @@
 #!/usr/bin/env python3
 """
-每日复盘总结生成 — cron wrapper script
-由 install.py 安装到 ~/.hermes/scripts/daily_review.py
+每日复盘总结生成
+在飞书创建或覆盖当天复盘文档（幂等）。
+依赖: lark-cli
 """
 import subprocess
 import json
 import sys
-from pathlib import Path
+from datetime import datetime, timezone, timedelta
 
-# 共享 lib 在 skills/lib/
-sys.path.insert(0, str(Path(__file__).parent / "lib"))  # lib: ~/.hermes/scripts/lib/
-
-from cron import get_cst_now, get_date_range, lark_calendar_agenda, format_event_time
-
-FEISHU_FOLDER = "{{FEISHU_FOLDER}}"  # 安装时自动替换
+FEISHU_FOLDER = "hermesAgent/每日复盘/"
 
 
-def get_today_str():
-    return get_cst_now().strftime("%Y-%m-%d")
+def get_cst_now():
+    return datetime.now(timezone(timedelta(hours=8)))
+
+
+def get_date_range(days_offset=0):
+    """返回 (date_str, start_iso, end_iso)，CST 时区。"""
+    dt = get_cst_now() + timedelta(days=days_offset)
+    date_str = dt.strftime("%Y-%m-%d")
+    return date_str, f"{date_str}T00:00:00+08:00", f"{date_str}T23:59:59+08:00"
+
+
+def lark_calendar_agenda(start: str, end: str) -> list:
+    result = subprocess.run(
+        ["lark-cli", "calendar", "+agenda",
+         "--start", start, "--end", end, "--format", "json"],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        return []
+    try:
+        data = json.loads(result.stdout)
+        return data if isinstance(data, list) else []
+    except json.JSONDecodeError:
+        return []
 
 
 def get_folder_token(folder_name: str, parent_token: str = None) -> str | None:
@@ -108,6 +126,16 @@ def update_doc(doc_id: str, markdown: str):
     return result.returncode == 0
 
 
+def format_event_time(start_val: str) -> str:
+    if not start_val:
+        return ""
+    try:
+        dt = datetime.fromisoformat(start_val.replace("Z", "+00:00"))
+        return dt.strftime("%H:%M")
+    except ValueError:
+        return ""
+
+
 def build_markdown(date_str: str, events: list) -> str:
     event_lines = []
     if events:
@@ -164,7 +192,7 @@ def build_markdown(date_str: str, events: list) -> str:
 
 
 def main():
-    date_str = get_today_str()
+    date_str = get_cst_now().strftime("%Y-%m-%d")
     print(f"正在生成 {date_str} 的复盘...", file=sys.stderr)
 
     folder_token = ensure_folder_structure()
@@ -173,6 +201,7 @@ def main():
         sys.exit(1)
     print(f"文件夹 token: {folder_token}", file=sys.stderr)
 
+    # 搜索当天文档
     existing = search_docs(date_str, folder_token)
     doc_id = None
     for doc in existing:
@@ -182,11 +211,14 @@ def main():
                       or doc.get("document", {}).get("document_id"))
             break
 
+    # 获取日历参考
     _, today_start, today_end = get_date_range(0)
     events = lark_calendar_agenda(today_start, today_end)
 
+    # 生成内容
     markdown = build_markdown(date_str, events)
 
+    # 创建或更新文档
     if doc_id:
         print(f"找到已有文档: {doc_id}，将覆盖内容", file=sys.stderr)
     else:
@@ -204,6 +236,7 @@ def main():
 
     print(f"文档已保存: {doc_id}", file=sys.stderr)
 
+    # 输出摘要（供 deliver 使用）
     print(f"\n✅ {date_str} 复盘已完成")
     print(f"\n飞书文档已更新: {FEISHU_FOLDER}{date_str}-复盘总结")
     if events:

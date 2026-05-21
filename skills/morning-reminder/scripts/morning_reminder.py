@@ -1,15 +1,52 @@
 #!/usr/bin/env python3
 """
-每日晨间日程提醒 — cron wrapper script
-由 install.py 安装到 ~/.hermes/scripts/morning_reminder.py
+每日晨间日程提醒
+Queries Feishu calendar for today and tomorrow, prints formatted agenda.
 """
-import sys
-from pathlib import Path
+import subprocess
+import json
+from datetime import datetime, timezone, timedelta
 
-# 共享 lib 在 skills/lib/，与脚本同级的上一级目录的上一级
-sys.path.insert(0, str(Path(__file__).parent / "lib"))  # lib: ~/.hermes/scripts/lib/
 
-from cron import get_date_range, lark_calendar_agenda, format_event
+def get_cst_now():
+    return datetime.now(timezone(timedelta(hours=8)))
+
+
+def get_date_range(days_offset=0):
+    """返回 (date_str, start_iso, end_iso)，CST 时区。"""
+    dt = get_cst_now() + timedelta(days=days_offset)
+    date_str = dt.strftime("%Y-%m-%d")
+    return date_str, f"{date_str}T00:00:00+08:00", f"{date_str}T23:59:59+08:00"
+
+
+def lark_calendar_agenda(start: str, end: str) -> list:
+    """调用 lark-cli calendar +agenda，返回事件列表或空列表。"""
+    result = subprocess.run(
+        ["lark-cli", "calendar", "+agenda",
+         "--start", start, "--end", end, "--format", "json"],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        return []
+    try:
+        data = json.loads(result.stdout)
+        return data if isinstance(data, list) else []
+    except json.JSONDecodeError:
+        return []
+
+
+def format_event(ev: dict) -> str:
+    """把单个日历事件格式化为 'HH:MM 标题' 或 '标题'。"""
+    title = ev.get("summary") or ev.get("title") or "无标题"
+    start_val = ev.get("start") or ev.get("start_time") or ""
+    time_str = ""
+    if start_val:
+        try:
+            dt = datetime.fromisoformat(start_val.replace("Z", "+00:00"))
+            time_str = dt.strftime("%H:%M")
+        except ValueError:
+            pass
+    return f"{time_str} {title}" if time_str else title
 
 
 def main():
