@@ -13,19 +13,32 @@
 用户 Skills：`~/.hermes/skills/`
 内置 Skills：`~/.hermes/hermes-agent/skills/`
 
-## 推荐技能清单
+## 用户创建技能
 
-| 技能 | 用途 |
-|------|------|
-| lark-cli | 飞书文档/日历/任务/云空间全部操作 |
-| just-one-api | 小红书、抖音、微博数据查询 |
-| web-search-ex-skill | 多引擎搜索（百度/必应/DuckDuckGo） |
-| friend-social-review | 人际关系辅助分析 |
-| yuanbao | 元宝群组管理 |
-| mmx-cli | MiniMax 文本/图片/视频/语音生成 |
-| weread | 微信读书助手 |
-| humanizer / de-ai-ify | 去除 AI 写作痕迹 |
-| twitter-playwright-graphql | X/Twitter 自动化 |
+存放在 `技能管理/skills/` 目录下，随本手册一并维护。
+
+### friend-social-review
+
+**功能**：以朋友口吻帮你复盘人际关系中的纠结事。不讲大道理，直接说人话。融合 5 本经典人际著作的底层逻辑，一对一交友场景的实战复盘。
+
+**定位**：不是专家/老师/心理医生，而是站在你这边帮你分析的朋友。直接给结论，不展开推理，不给背景说明。如果太敏感、太上头、投入太多，会直接说。
+
+**触发**：用户描述一段关系里的经历，请求分析时自动加载。
+
+**文件**：`技能管理/skills/friend-social-review/`
+
+## 推荐开源技能
+
+| 技能 | 来源 | 用途 | 开源链接 |
+|------|------|------|----------|
+| lark-cli | @larksuite/cli | 飞书文档/日历/任务/云空间全部操作 | https://github.com/larksuite/cli |
+| just-one-api | 开源项目 | 小红书、抖音、微博数据查询 | https://github.com/RIM99/just-one-api |
+| web-search-ex-skill | @yejinlei | 多引擎搜索（百度/必应/DuckDuckGo） | https://github.com/yejinlei/web-search-ex-skill |
+| yuanbao | 开源项目 | 元宝群组管理 | - |
+| mmx-cli | MiniMax | MiniMax 文本/图片/视频/语音生成 | https://github.com/MiniMax-api/minimax-cli |
+| weread | 开源项目 | 微信读书助手 | - |
+| humanizer / de-ai-ify | @ieou新知 | 去除 AI 写作痕迹 | https://github.com/ieou/humanizer |
+| twitter-playwright-graphql | 开源项目 | X/Twitter GraphQL 自动化 | - |
 
 ## Skill 安装
 
