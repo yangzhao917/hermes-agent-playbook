@@ -13,10 +13,10 @@
 统一用 `feishu-task` skill：
 
 ```bash
-python3 ~/.hermes/skills/feishu-task/scripts/list_tasks.py --completed=false
-python3 ~/.hermes/skills/feishu-task/scripts/create_task.py --summary "标题" --due "+2d"
-python3 ~/.hermes/skills/feishu-task/scripts/complete_task.py --query "关键词"
-python3 ~/.hermes/skills/feishu-task/scripts/stats.py
+python3 /home/ubuntu/skills/feishu-task/scripts/list_tasks.py --completed=false
+python3 /home/ubuntu/skills/feishu-task/scripts/create_task.py --summary "标题" --due "+2d"
+python3 /home/ubuntu/skills/feishu-task/scripts/complete_task.py --query "关键词"
+python3 /home/ubuntu/skills/feishu-task/scripts/stats.py
 ```
 
 具体命令见 `lark-cli` skill 和 `feishu-task` skill。
