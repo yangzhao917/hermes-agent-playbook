@@ -15,7 +15,7 @@
 
 ### 创建新文档
 
-1. 先 `feishu-cli auth login --domain drive --domain all --recommend` 让用户扫码授权
+1. 先 `lark-cli auth login --domain drive --domain all --recommend` 让用户扫码授权
 
 2. 用 `lark-cli docs +create` 创建文档（transfer_ownership=true）再写入内容
 
@@ -41,7 +41,7 @@ lark-cli docs +update --mode overwrite --markdown-file file.md
 lark-cli docs +update --mode replace_range --selection-by-title "标题名"
 ```
 
-> ⚠️ 不要用 `feishu-cli doc import --document-id`（会追加内容，不是覆盖）
+> ⚠️ 不要用 `import` 命令追加内容，要覆盖写入用 `+update --mode overwrite`
 
 ### 查看已有文档
 
@@ -57,38 +57,30 @@ lark-cli doc export DOC_ID -o output.md
 
 ## 待办任务
 
-### 创建待办（自动带执行人）
+> ✅ 现在统一用 `feishu-task` skill（`python3 ~/.hermes/skills/feishu-task/scripts/xxx.py`），不再用直接 curl 调用。
 
-用 `user_access_token` 创建时，直接在 POST body 里带 member：
-
-```json
-{
-  "summary": "任务标题",
-  "description": "任务描述",
-  "due": { "timestamp": "1779465599000" },
-  "members": [
-    { "id": "<USER_ID>", "role": "assignee", "type": "user" }
-  ]
-}
-```
-
-- user_id：`<USER_ID>`
-- 这样创建出来任务自带执行人，无需二次添加
-
-> ⚠️ 任务创建必须加 `--assignee`，否则用户在飞书看不到任务
-
-### 更新/删除待办
-
+### 查看任务
 ```bash
-# 更新
-curl -X PATCH "https://open.feishu.cn/open-apis/task/v2/tasks/{guid}" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{"task": {"summary": "新标题"}, "update_fields": ["summary"]}'
-
-# 删除
-curl -X DELETE "https://open.feishu.cn/open-apis/task/v2/tasks/{guid}" \
-  -H "Authorization: Bearer $TOKEN"
+python3 ~/.hermes/skills/feishu-task/scripts/list_tasks.py --completed=false
 ```
+
+### 创建任务
+```bash
+python3 ~/.hermes/skills/feishu-task/scripts/create_task.py \
+  --summary "任务标题" --due "+2d"
+```
+
+### 完成任务（模糊匹配）
+```bash
+python3 ~/.hermes/skills/feishu-task/scripts/complete_task.py --query "关键词"
+```
+
+### 统计概览
+```bash
+python3 ~/.hermes/skills/feishu-task/scripts/stats.py
+```
+
+> ⚠️ 任务创建必须带 `--assignee`，否则用户在飞书看不到任务
 
 ### 日程与待办联动规则
 
@@ -138,7 +130,7 @@ curl "https://open.feishu.cn/open-apis/calendar/v4/calendars/$CAL_ID/events?star
 
 ### Token 文件
 
-`~/.feishu-cli/token.json`，字段名是 `access_token`（不是 `user_access_token`）
+`~/.lark-cli/hermes`（lark-cli 的 token 存放路径）
 
 ### 有效期
 
@@ -148,7 +140,7 @@ curl "https://open.feishu.cn/open-apis/calendar/v4/calendars/$CAL_ID/events?star
 ### 静默刷新
 
 ```bash
-feishu-cli auth refresh
+lark-cli auth refresh
 ```
 
 ### 常见错误码

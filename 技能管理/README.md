@@ -39,11 +39,15 @@
 
 ## Skill 安装
 
-```bash
-# 通过 hermes curator 安装
-hermes curator install <skill-name>
+技能存放位置：`HERMES_SKILLS_DIR=/home/ubuntu/skills`（用户 Skills）和 `~/.hermes/skills/`（内置用户 Skills）。
 
-# 或手动放置到 ~/.hermes/skills/<skill-name>/
+手动放置到 `~/.hermes/skills/<skill-name>/`，Hermes 会自动发现。
+
+```bash
+# 安装来自 GitHub/Hub 的技能
+hermes skills install <skill-name>
+
+# 技能安装后会被自动发现（skills_list 可查）
 ```
 
 ## Skill 编写规范
