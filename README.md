@@ -24,6 +24,7 @@
 | 创建飞书任务 | [feishu-task](../飞书/feishu-task/SKILL.md) |
 | 查看飞书日历 | [feishu-calendar](../飞书/feishu-calendar/SKILL.md) |
 | 写每日复盘 | [daily-review](./skills/daily-review.md) |
+| 清理过期记忆 | [memory-cleanup](./skills/memory-cleanup.md) |
 | 飞书 Token 续期 | [飞书 README - Token 管理](./飞书/README.md#token-管理) |
 | 查看 cron 任务 | [定时任务](./定时任务/README.md) |
 
@@ -43,7 +44,8 @@ hermes-agent-playbook/
 ├── skills/                # 通用 skill（不依赖特定平台）
 │   ├── friend-social-review/
 │   ├── morning-reminder/
-│   └── daily-review/
+│   ├── daily-review/
+│   └── memory-cleanup.md
 ├── 定时任务/              # cron 规范（跨平台通用）
 ├── 用户规约/              # 用户偏好（跨平台通用）
 └── 配置指南/              # 环境配置（跨平台通用）
@@ -60,7 +62,7 @@ hermes-agent-playbook/
 | [定时任务](./定时任务/README.md) | cron 架构规范、复盘总结模板 |
 | [用户规约](./用户规约/README.md) | 用户偏好、飞书操作规范、时间计算规范 |
 | [配置指南](./配置指南/README.md) | 安装配置、更新、新功能说明 |
-| [skills](./skills/) | 通用 skill（morning-reminder、daily-review、friend-social-review） |
+| [skills](./skills/) | 通用 skill（morning-reminder、daily-review、friend-social-review、memory-cleanup） |
 
 ---
 
