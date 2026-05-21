@@ -29,6 +29,7 @@
 | 技能 | 功能 | 触发场景 | 文件 |
 |------|------|----------|------|
 | feishu-task | 飞书任务 CRUD + 逾期预警 + 统计概览 | 用户请求查看/创建/完成飞书任务 | [skills/feishu-task/](skills/feishu-task/) |
+| feishu-calendar | 飞书日程查看/创建/删除，支持相对日期快捷方式 | 用户请求查看/创建/删除日历日程 | [skills/feishu-calendar/](skills/feishu-calendar/) |
 | friend-social-review | 以朋友口吻复盘人际关系纠结事 | 用户描述关系经历并请求分析 | [skills/friend-social-review/](skills/friend-social-review/) |
 | daily-review | 每日复盘总结生成与管理 | 「写复盘」「生成复盘」「今日总结」 | [skills/daily-review.md](skills/daily-review.md) |
 | morning-reminder | 每日晨间日程提醒（7:00） | cron 自动触发、用户问「今天有什么安排」 | [skills/morning-reminder.md](skills/morning-reminder.md) |

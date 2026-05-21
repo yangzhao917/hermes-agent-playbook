@@ -23,6 +23,8 @@ python3 /home/ubuntu/skills/feishu-task/scripts/stats.py
 
 > ⚠️ 任务创建必须带 `--assignee`，否则用户在飞书看不到任务
 
+> ⚠️ 日历查询用 `lark-cli calendar +agenda`（今天默认），不要用 `+events`
+
 ## 日程与待办联动规则
 
 **新增 / 更新 / 完成 / 删除 时，日程和待办必须同步处理。**
