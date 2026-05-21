@@ -39,15 +39,15 @@ def lark_calendar_agenda(start: str, end: str) -> list:
 
 
 def get_folder_token(folder_name: str, parent_token: str = None) -> str | None:
-    cmd = ["lark-cli", "drive", "+list", "--format", "json"]
-    if parent_token:
-        cmd += ["--folder-token", parent_token]
+    params = {} if not parent_token else {"folder_token": parent_token}
+    cmd = ["lark-cli", "drive", "files", "list",
+           "--params", json.dumps(params), "--format", "json"]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         return None
     try:
-        items = json.loads(result.stdout)
-        for item in items:
+        data = json.loads(result.stdout)
+        for item in data.get("data", {}).get("files", []):
             if item.get("name") == folder_name and item.get("type") == "folder":
                 return item.get("token")
     except (json.JSONDecodeError, KeyError):
@@ -56,23 +56,27 @@ def get_folder_token(folder_name: str, parent_token: str = None) -> str | None:
 
 
 def create_folder(name: str, parent_token: str = None) -> str | None:
-    cmd = ["lark-cli", "drive", "+create-folder", "--name", name, "--format", "json"]
-    if parent_token:
-        cmd += ["--folder-token", parent_token]
+    body = {"name": name, "folder_token": parent_token or ""}
+    cmd = ["lark-cli", "drive", "files", "create_folder",
+           "--data", json.dumps(body), "--format", "json"]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         return None
     try:
         data = json.loads(result.stdout)
-        return data.get("token") or data.get("folder_token")
+        return data.get("data", {}).get("file", {}).get("token")
     except (json.JSONDecodeError, KeyError):
         return None
 
 
+# hermesAgent 文件夹的真实父级
+HERMES_PARENT_TOKEN = "nodcnu9wxEkxzgM53MYnlJXM4Kp"
+
+
 def ensure_folder_structure() -> str | None:
-    hermes_token = get_folder_token("hermesAgent")
+    hermes_token = get_folder_token("hermesAgent", HERMES_PARENT_TOKEN)
     if not hermes_token:
-        hermes_token = create_folder("hermesAgent")
+        hermes_token = create_folder("hermesAgent", HERMES_PARENT_TOKEN)
         if not hermes_token:
             print("创建 hermesAgent 文件夹失败", file=sys.stderr)
             return None
@@ -88,10 +92,7 @@ def ensure_folder_structure() -> str | None:
 
 
 def search_docs(query: str, folder_token: str = None) -> list:
-    cmd = ["lark-cli", "docs", "+search", "--query", query,
-           "--format", "json", "--doc-types", "docx"]
-    if folder_token:
-        cmd += ["--folder-tokens", folder_token]
+    cmd = ["lark-cli", "docs", "+search", "--query", query, "--format", "json"]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         return []
@@ -105,14 +106,14 @@ def search_docs(query: str, folder_token: str = None) -> list:
 def create_doc(title: str, folder_token: str) -> str | None:
     result = subprocess.run(
         ["lark-cli", "docs", "+create",
-         "--title", title, "--folder-token", folder_token, "--format", "json"],
+         "--title", title, "--folder-token", folder_token, "--markdown", " "],
         capture_output=True, text=True
     )
     if result.returncode != 0:
         return None
     try:
         data = json.loads(result.stdout)
-        return data.get("doc_id") or data.get("document", {}).get("document_id")
+        return data.get("data", {}).get("doc_id")
     except (json.JSONDecodeError, KeyError):
         return None
 
