@@ -9,7 +9,7 @@ import json
 import sys
 from datetime import datetime, timezone, timedelta
 
-FEISHU_FOLDER = "hermesAgent/每日复盘/"
+FEISHU_FOLDER = "HermesAgent/每日复盘/"
 
 
 def get_cst_now():
@@ -69,16 +69,16 @@ def create_folder(name: str, parent_token: str = None) -> str | None:
         return None
 
 
-# hermesAgent 文件夹的真实父级
+# HermesAgent 文件夹的真实父级（正确路径：HermesAgent/每日复盘/）
 HERMES_PARENT_TOKEN = "nodcnu9wxEkxzgM53MYnlJXM4Kp"
 
 
 def ensure_folder_structure() -> str | None:
-    hermes_token = get_folder_token("hermesAgent", HERMES_PARENT_TOKEN)
+    hermes_token = get_folder_token("HermesAgent", HERMES_PARENT_TOKEN)
     if not hermes_token:
-        hermes_token = create_folder("hermesAgent", HERMES_PARENT_TOKEN)
+        hermes_token = create_folder("HermesAgent", HERMES_PARENT_TOKEN)
         if not hermes_token:
-            print("创建 hermesAgent 文件夹失败", file=sys.stderr)
+            print("创建 HermesAgent 文件夹失败", file=sys.stderr)
             return None
 
     daily_token = get_folder_token("每日复盘", hermes_token)
