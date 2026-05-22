@@ -58,7 +58,7 @@ def format_task_time(ts_ms: int | None) -> str:
 
 
 def get_today_tasks() -> tuple:
-    """返回 (今日计划, 今日完成, 明日待办) 三个列表，每个元素是 (时间, 事项, 备注)。"""
+    """返回 (今日计划, 今日完成, 明日待办, 待跟进) 四个列表，每个元素是 (时间, 事项, 备注)。"""
     today = get_cst_now().strftime("%Y-%m-%d")
     tomorrow = (get_cst_now() + timedelta(days=1)).strftime("%Y-%m-%d")
     today_dt = get_cst_now().date()
@@ -84,6 +84,7 @@ def get_today_tasks() -> tuple:
             pass  # 跳过更远的
 
     # 已完成任务中找今天完成的
+    done_summaries = set()
     for t in completed:
         due = t.get("due", {})
         ts = due.get("timestamp") if due else None
@@ -93,8 +94,14 @@ def get_today_tasks() -> tuple:
         summary = t.get("summary", "无标题")
         if dt == today_dt:
             today_done.append(("今日完成", summary, ""))
+            done_summaries.add(summary)
 
-    return today_plan, today_done, tomorrow_todo
+    # 待跟进：今日计划中未完成的任务
+    followup = [(time_label, summary, remark)
+                for time_label, summary, remark in today_plan
+                if summary not in done_summaries]
+
+    return today_plan, today_done, tomorrow_todo, followup
 
 
 # ─── 飞书日历 ───────────────────────────────────────────
@@ -292,7 +299,7 @@ def build_table(rows: list, cols: list) -> str:
 
 
 def build_markdown(date_str: str, tasks_data: tuple, calendar_events: list) -> str:
-    today_plan, today_done, tomorrow_todo = tasks_data
+    today_plan, today_done, tomorrow_todo, followup = tasks_data
 
     lines = []
 
@@ -321,7 +328,11 @@ def build_markdown(date_str: str, tasks_data: tuple, calendar_events: list) -> s
         lines.append("")
 
     # 📌 待跟进
-    lines.extend(["## 📌 待跟进", "", "🔴 紧急  🟡 一般  🟢 缓办"])
+    if followup:
+        lines.extend(["## 📌 待跟进", "", "🔴 紧急  🟡 一般  🟢 缓办", ""])
+        for time_label, summary, remark in followup:
+            lines.append(f"- {summary}")
+        lines.append("")
 
     return "\n".join(lines)
 
@@ -342,8 +353,8 @@ def main():
     # 拉取数据
     print("拉取飞书任务...", file=sys.stderr)
     tasks_data = get_today_tasks()
-    today_plan, today_done, tomorrow_todo = tasks_data
-    print(f"  今日到期: {len(today_plan)}, 今日完成: {len(today_done)}, 明日到期: {len(tomorrow_todo)}", file=sys.stderr)
+    today_plan, today_done, tomorrow_todo, followup = tasks_data
+    print(f"  今日到期: {len(today_plan)}, 今日完成: {len(today_done)}, 明日到期: {len(tomorrow_todo)}, 待跟进: {len(followup)}", file=sys.stderr)
 
     print("拉取飞书日历...", file=sys.stderr)
     calendar_events = get_today_calendar()
