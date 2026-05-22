@@ -282,7 +282,7 @@ def update_doc(doc_id: str, markdown: str):
 # ─── Markdown 生成 ───────────────────────────────────────
 
 def build_table(rows: list, cols: list) -> str:
-    """rows: [(时间, 事项, 备注), ...]，cols: [列名, ...]"""
+    """rows: [(cell, ...), ...]，cols: [列名, ...]"""
     lines = ["| " + " | ".join(cols) + " |",
              "|" + "|".join(["------"] * len(cols)) + "|"]
     for row in rows:
@@ -291,63 +291,40 @@ def build_table(rows: list, cols: list) -> str:
     return "\n".join(lines)
 
 
-def build_checklist(items: list) -> str:
-    """纯文本 checklist，每项一行。"""
-    if not items:
-        return "（无）"
-    return "\n".join(f"- {name}" for _, name in items)
-
-
 def build_markdown(date_str: str, tasks_data: tuple, calendar_events: list) -> str:
     today_plan, today_done, tomorrow_todo = tasks_data
 
-    lines = [
-        "## 📋 今日计划",
-        "",
-    ]
+    lines = []
 
-    # 今日计划：已办完 + 未完成 分组
-    done_items = [t for t in today_plan]  # 完成任务放这儿
-    plan_items = [t for t in today_plan]  # 待办放这儿
+    # 今日计划：有未完成才生成
+    if today_plan:
+        lines.extend(["## 📋 今日计划", ""])
+        rows = []
+        for _, summary, remark in today_plan:
+            rows.append(("✗ 未完成", summary, remark or "-"))
+        lines.append(build_table(rows, ["状态", "事项", "备注"]))
+        lines.append("")
 
-    # 完成情况摘要
-    total_plan = len(today_plan)
-    done_tasks = today_done  # 标记为完成的任务（按理说today_done应该等于done_items）
-    remaining = [t for t in today_plan]  # 未完成的
-
-    if remaining:
-        lines.append(f"**共 {total_plan} 项，未完成 {len(remaining)} 项**\n")
-        for _, summary, _ in remaining:
-            lines.append(f"- ✗ {summary}")
-    else:
-        lines.append(f"**{total_plan} 项，全部完成 ✅**\n")
-        lines.append("（空白比任何文字都有力）")
-
-    lines.extend(["", "## ✅ 今日完成", ""])
-
+    # 今日完成：有完成才生成
     if today_done:
-        for _, summary, _ in today_done:
-            lines.append(f"- ✓ {summary}")
-    else:
-        lines.append("（无）")
+        lines.extend(["## ✅ 今日完成", ""])
+        rows = [(summary,) for _, summary, _ in today_done]
+        lines.append(build_table(rows, ["事项"]))
+        lines.append("")
 
-    lines.extend(["", "## ⏰ 明日待办", ""])
-
+    # 明日待办：有才生成
     if tomorrow_todo:
-        for _, summary, _ in tomorrow_todo:
-            lines.append(f"- → {summary}")
-    else:
-        lines.append("（无）")
+        lines.extend(["## ⏰ 明日待办", ""])
+        rows = [(time_label, summary, remark or "-") for time_label, summary, remark in tomorrow_todo]
+        lines.append(build_table(rows, ["时间", "事项", "备注"]))
+        lines.append("")
 
-    lines.extend(["", "## 📅 今日日程", ""])
-
+    # 今日日程：有才生成
     if calendar_events:
-        for t, name in calendar_events:
-            lines.append(f"- {t}  {name}")
-    else:
-        lines.append("（无）")
-
-    lines.extend(["", "## 📌 待跟进", "", "🔴 紧急  🟡 一般  🟢 缓办"])
+        lines.extend(["## 📅 今日日程", ""])
+        rows = [(t, name) for t, name in calendar_events]
+        lines.append(build_table(rows, ["时间", "事项"]))
+        lines.append("")
 
     return "\n".join(lines)
 
