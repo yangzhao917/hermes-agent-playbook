@@ -432,7 +432,7 @@ def main():
             lines_out.append(f"  {t} {name}")
         lines_out.append("")
 
-    lines_out.append(f"📄 完整版 → HermesAgent/每日复盘/{date_str}-复盘总结")
+    lines_out.append(f"📄 完整版 → https://feishu.cn/docx/{doc_id}")
 
     print("\n".join(lines_out))
 
