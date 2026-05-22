@@ -291,38 +291,63 @@ def build_table(rows: list, cols: list) -> str:
     return "\n".join(lines)
 
 
+def build_checklist(items: list) -> str:
+    """纯文本 checklist，每项一行。"""
+    if not items:
+        return "（无）"
+    return "\n".join(f"- {name}" for _, name in items)
+
+
 def build_markdown(date_str: str, tasks_data: tuple, calendar_events: list) -> str:
     today_plan, today_done, tomorrow_todo = tasks_data
 
     lines = [
         "## 📋 今日计划",
         "",
-        f"来源：飞书任务（{len(today_plan)} 项今日到期）",
-        "",
     ]
 
-    if today_plan:
-        lines.append(build_table(today_plan, ["时间", "事项", "备注"]))
+    # 今日计划：已办完 + 未完成 分组
+    done_items = [t for t in today_plan]  # 完成任务放这儿
+    plan_items = [t for t in today_plan]  # 待办放这儿
+
+    # 完成情况摘要
+    total_plan = len(today_plan)
+    done_tasks = today_done  # 标记为完成的任务（按理说today_done应该等于done_items）
+    remaining = [t for t in today_plan]  # 未完成的
+
+    if remaining:
+        lines.append(f"**共 {total_plan} 项，未完成 {len(remaining)} 项**\n")
+        for _, summary, _ in remaining:
+            lines.append(f"- ✗ {summary}")
     else:
-        lines.append("| 时间 | 事项 | 备注 |\n|------|------|------|\n| - | - | - |")
+        lines.append(f"**{total_plan} 项，全部完成 ✅**\n")
+        lines.append("（空白比任何文字都有力）")
+
     lines.extend(["", "## ✅ 今日完成", ""])
 
     if today_done:
-        lines.append(build_table(today_done, ["完成", "未完成", "调整"]))
+        for _, summary, _ in today_done:
+            lines.append(f"- ✓ {summary}")
     else:
-        lines.append("| 完成 | 未完成 | 调整 |\n|------|--------|------|\n| - | - | - |")
+        lines.append("（无）")
+
     lines.extend(["", "## ⏰ 明日待办", ""])
 
     if tomorrow_todo:
-        lines.append(build_table(tomorrow_todo, ["时间", "事项", "备注"]))
+        for _, summary, _ in tomorrow_todo:
+            lines.append(f"- → {summary}")
     else:
-        lines.append("| 时间 | 事项 | 备注 |\n|------|------|------|\n| - | - | - |")
-    lines.extend(["", "## 📌 待跟进", "", "🔴 紧急  🟡 一般  🟢 缓办"])
+        lines.append("（无）")
+
+    lines.extend(["", "## 📅 今日日程", ""])
 
     if calendar_events:
-        lines.extend(["", "## 📅 今日日程", ""])
         for t, name in calendar_events:
-            lines.append(f"- {t} {name}")
+            lines.append(f"- {t}  {name}")
+    else:
+        lines.append("（无）")
+
+    lines.extend(["", "## 📌 待跟进", "", "🔴 紧急  🟡 一般  🟢 缓办"])
 
     return "\n".join(lines)
 
@@ -373,15 +398,43 @@ def main():
     todo_count = len(tomorrow_todo)
     cal_count = len(calendar_events)
 
-    summary = f"📋 今日计划 {plan_count} 项"
-    if done_count:
-        summary += f" | ✅ 完成 {done_count} 项"
-    if todo_count:
-        summary += f" | ⏰ 明日待办 {todo_count} 项"
-    if cal_count:
-        summary += f" | 📅 日程 {cal_count} 项"
+    lines_out = [f"✅ {date_str} 复盘", ""]
 
-    print(f"\n✅ {date_str} 复盘已完成\n\n{summary}\n\n📄 完整内容：HermesAgent/每日复盘/{date_str}-复盘总结")
+    # 今日计划
+    lines_out.append(f"【今日计划】  {plan_count} 项")
+    if today_plan:
+        for _, summary, _ in today_plan:
+            lines_out.append(f"✗ {summary}")
+    else:
+        lines_out.append("  （无）")
+    lines_out.append("")
+
+    # 今日完成
+    lines_out.append(f"【今日完成】  {done_count} 项")
+    if today_done:
+        for _, summary, _ in today_done:
+            lines_out.append(f"✓ {summary}")
+    else:
+        lines_out.append("  （空白比任何文字都有力）")
+    lines_out.append("")
+
+    # 明日待办
+    lines_out.append(f"【明日待办】  {todo_count} 项")
+    if tomorrow_todo:
+        for _, summary, _ in tomorrow_todo:
+            lines_out.append(f"→ {summary}")
+    lines_out.append("")
+
+    # 今日日程
+    if calendar_events:
+        lines_out.append("【今日日程】")
+        for t, name in calendar_events:
+            lines_out.append(f"  {t} {name}")
+        lines_out.append("")
+
+    lines_out.append(f"📄 完整版 → HermesAgent/每日复盘/{date_str}-复盘总结")
+
+    print("\n".join(lines_out))
 
 
 if __name__ == "__main__":
