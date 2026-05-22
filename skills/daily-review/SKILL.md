@@ -50,7 +50,7 @@ python3 ~/.hermes/skills/daily-review/scripts/daily_review.py
 | 时间 | 事项 | 备注 |
 
 ## 📌 待跟进
-有内容才生成。内容来源：今日计划中未完成的任务（按 summary 匹配）。
+（暂无固定来源，有需要时在复盘中手动补充）
 🔴 紧急  🟡 一般  🟢 缓办
 
 ## 📅 后续安排

@@ -1,7 +1,7 @@
 ---
 name: morning-reminder
 description: "Use when setting up or checking daily calendar reminders. Queries Feishu calendar and formats today's and tomorrow's agenda."
-version: 1.0.0
+version: 1.0.1
 author: 杨钊
 license: MIT
 metadata:
@@ -14,14 +14,20 @@ metadata:
 
 每日推送飞书日历日程摘要（今日 + 明日）。
 
-## 何时使用
+## 触发规则
 
 - 用户说"设置晨间提醒"、"每天早上看日历"
 - cron job 自动触发
+- 加载本 skill 后调用对应脚本，不要自己拼接命令
+
+## 速查
+
+| 操作 | 命令 |
+|------|------|
+| 拉取今日+明日日历 | `python3 ~/.hermes/skills/morning-reminder/scripts/morning_reminder.py` |
+| 日历 API | `lark-cli calendar +agenda`（秒级时间戳，不用 datetime 格式） |
 
 ## 使用方式
-
-依赖 `lark-cli`。查询飞书日历并格式化输出：
 
 ```bash
 python3 ~/.hermes/skills/morning-reminder/scripts/morning_reminder.py

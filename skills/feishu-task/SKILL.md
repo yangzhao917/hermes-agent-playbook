@@ -1,9 +1,35 @@
 ---
 name: feishu-task
 description: 飞书任务管理 skill，基于 lark-cli 实现任务 CRUD、逾期预警、统计概览。当用户说「查看任务」「查看待办」「我的任务」「飞书任务」「完成任务」「创建任务」时加载。
-version: 1.0.0
+version: 1.1.0
 category: productivity
 ---
+
+## 触发规则
+
+- 「查看任务」「查看待办」「我的任务」「飞书任务」
+- 「创建任务」「添加待办」
+- 「完成任务」「删除任务」「搜索任务」
+- 「任务统计」「任务概览」
+
+## 速查
+
+| 操作 | 命令 |
+|------|------|
+| 查未完成任务 | `python3 ~/.hermes/skills/feishu-task/scripts/list_tasks.py --completed=false` |
+| 查已完成任务 | `python3 ~/.hermes/skills/feishu-task/scripts/list_tasks.py --completed=true` |
+| 创建任务 | `python3 ~/.hermes/skills/feishu-task/scripts/create_task.py --summary "标题" --due "+2d"` |
+| 完成任务（模糊） | `python3 ~/.hermes/skills/feishu-task/scripts/complete_task.py --query "关键词"` |
+| 批量完成 | `python3 ~/.hermes/skills/feishu-task/scripts/batch_complete.py --guids "guid1,guid2"` |
+| 搜索任务 | `python3 ~/.hermes/skills/feishu-task/scripts/search_tasks.py --query "关键词"` |
+| 统计概览 | `python3 ~/.hermes/skills/feishu-task/scripts/stats.py` |
+
+## 边界条件
+
+**不负责：**
+- 日历操作 → 用 `lark-cli calendar`
+- 文档操作 → 用 `lark-cli docs`
+- 批量任务超 10 个 → 分批执行，每次不超过 10 个
 
 ## 依赖
 
@@ -16,7 +42,7 @@ category: productivity
 ~/.hermes/skills/feishu-task/scripts/
 ├── list_tasks.py       # 查看任务列表
 ├── create_task.py      # 创建任务
-├── complete_task.py    # 完成任务（模糊匹配）
+├── complete_task.py     # 完成任务（模糊匹配）
 ├── batch_complete.py   # 批量完成任务
 ├── search_tasks.py     # 搜索任务
 └── stats.py            # 统计概览
