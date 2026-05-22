@@ -165,8 +165,10 @@ def get_today_calendar() -> list:
     events = get_calendar_events(token, cal_id, date_str)
     result = []
     for ev in events:
+        if ev.get("status") == "cancelled":
+            continue
         t = format_event_time(ev)
-        name = ev.get("summary", "无标题")
+        name = ev.get("summary") or "无标题"
         loc = ev.get("location", {}).get("location", "")
         if loc:
             name = f"{name} @{loc}"
