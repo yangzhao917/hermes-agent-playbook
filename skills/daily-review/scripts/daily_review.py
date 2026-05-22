@@ -382,38 +382,40 @@ def main():
     lines_out = [f"✅ {date_str} 复盘", ""]
 
     # 今日计划
-    lines_out.append(f"【今日计划】  {plan_count} 项")
+    lines_out.append("📋 今日计划")
     if today_plan:
         for _, summary, _ in today_plan:
-            lines_out.append(f"✗ {summary}")
+            lines_out.append(f"  ✗ {summary}")
     else:
-        lines_out.append("  （无）")
+        lines_out.append("  （暂无）")
     lines_out.append("")
 
     # 今日完成
-    lines_out.append(f"【今日完成】  {done_count} 项")
+    lines_out.append("✅ 今日完成")
     if today_done:
         for _, summary, _ in today_done:
-            lines_out.append(f"✓ {summary}")
+            lines_out.append(f"  ✓ {summary}")
     else:
-        lines_out.append("  （空白比任何文字都有力）")
+        lines_out.append("  （暂无）")
     lines_out.append("")
 
     # 明日待办
-    lines_out.append(f"【明日待办】  {todo_count} 项")
+    lines_out.append("⏰ 明日待办")
     if tomorrow_todo:
         for _, summary, _ in tomorrow_todo:
-            lines_out.append(f"→ {summary}")
+            lines_out.append(f"  → {summary}")
+    else:
+        lines_out.append("  （暂无）")
     lines_out.append("")
 
     # 今日日程
     if calendar_events:
-        lines_out.append("【今日日程】")
+        lines_out.append("📅 今日日程")
         for t, name in calendar_events:
             lines_out.append(f"  {t} {name}")
         lines_out.append("")
 
-    lines_out.append(f"📄 完整版 → https://feishu.cn/docx/{doc_id}")
+    lines_out.append(f"📄 [{FEISHU_FOLDER}{date_str}-复盘总结](https://feishu.cn/docx/{doc_id})")
 
     print("\n".join(lines_out))
 
