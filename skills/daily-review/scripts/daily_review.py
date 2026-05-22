@@ -296,35 +296,39 @@ def build_markdown(date_str: str, tasks_data: tuple, calendar_events: list) -> s
 
     lines = []
 
-    # 今日计划：有未完成才生成
-    if today_plan:
-        lines.extend(["## 📋 今日计划", ""])
-        rows = []
-        for _, summary, remark in today_plan:
-            rows.append(("✗ 未完成", summary, remark or "-"))
-        lines.append(build_table(rows, ["状态", "事项", "备注"]))
-        lines.append("")
+    # 📋 今日计划
+    lines.extend(["## 📋 今日计划", "",
+                  "来源：昨日「明日待办」+ 今日新增计划", ""])
+    plan_rows = [(time_label, summary, remark or "-")
+                 for time_label, summary, remark in today_plan] if today_plan else [("-", "-", "-")]
+    lines.append(build_table(plan_rows, ["时间", "事项", "备注"]))
+    lines.append("")
 
-    # 今日完成：有完成才生成
-    if today_done:
-        lines.extend(["## ✅ 今日完成", ""])
-        rows = [(summary,) for _, summary, _ in today_done]
-        lines.append(build_table(rows, ["事项"]))
-        lines.append("")
+    # ✅ 今日完成
+    lines.extend(["## ✅ 今日完成", ""])
+    done_rows = [(summary, "-", "-")
+                 for _, summary, _ in today_done] if today_done else [("-", "-", "-")]
+    lines.append(build_table(done_rows, ["完成", "未完成", "调整"]))
+    lines.append("")
 
-    # 明日待办：有才生成
-    if tomorrow_todo:
-        lines.extend(["## ⏰ 明日待办", ""])
-        rows = [(time_label, summary, remark or "-") for time_label, summary, remark in tomorrow_todo]
-        lines.append(build_table(rows, ["时间", "事项", "备注"]))
-        lines.append("")
+    # ⏰ 明日待办
+    lines.extend(["## ⏰ 明日待办", ""])
+    todo_rows = [(time_label, summary, remark or "-")
+                 for time_label, summary, remark in tomorrow_todo] if tomorrow_todo else [("-", "-", "-")]
+    lines.append(build_table(todo_rows, ["时间", "事项", "备注"]))
+    lines.append("")
 
-    # 今日日程：有才生成
-    if calendar_events:
-        lines.extend(["## 📅 今日日程", ""])
-        rows = [(t, name) for t, name in calendar_events]
-        lines.append(build_table(rows, ["时间", "事项"]))
-        lines.append("")
+    # 📌 待跟进
+    lines.extend(["## 📌 待跟进", "", "🔴 紧急  🟡 一般  🟢 缓办", ""])
+
+    # 📅 后续安排（空节不生成内容，只保留标题供后续填充）
+    lines.extend(["## 📅 后续安排", "", "| 日期 | 事项 |", "|------|------|", "| - | - |", ""])
+
+    # 💡 今日收获（空节不生成内容，只保留标题供后续填充）
+    lines.extend(["## 💡 今日收获", "", ""])
+
+    # ⚡ 今日感受（空节不生成内容，只保留标题供后续填充）
+    lines.extend(["## ⚡ 今日感受", ""])
 
     return "\n".join(lines)
 
