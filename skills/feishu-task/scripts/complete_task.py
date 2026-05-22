@@ -6,7 +6,7 @@
 import argparse
 import json
 import subprocess
-from rapidfuzz import fuzz
+from difflib import SequenceMatcher
 
 
 def search_tasks(query: str):
@@ -36,7 +36,7 @@ def main():
     # 模糊匹配，取最高分
     best_score, best_task = 0, None
     for t in tasks:
-        score = fuzz.ratio(args.query.lower(), t.get("summary", "").lower())
+        score = SequenceMatcher(None, args.query.lower(), t.get("summary", "").lower()).ratio() * 100
         if score > best_score:
             best_score = score
             best_task = t

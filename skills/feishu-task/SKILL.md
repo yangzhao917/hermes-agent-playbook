@@ -64,7 +64,7 @@ python3 ~/.hermes/skills/feishu-task/scripts/stats.py
 # 搜索任务
 python3 ~/.hermes/skills/feishu-task/scripts/search_tasks.py --query "关键词"
 
-# 创建任务
+# 创建任务（无 dry-run）
 python3 ~/.hermes/skills/feishu-task/scripts/create_task.py --summary "任务标题" --due "+2d"
 
 # 完成任务（模糊匹配）
@@ -108,7 +108,7 @@ python3 ~/.hermes/skills/feishu-task/scripts/batch_complete.py --guids "guid1,gu
 必须**串行**执行，每次单独 `--task-id`，禁止并行（输出交织无法判断成败）。
 
 ### 模糊匹配
-使用 `rapidfuzz`，阈值 60%。
+使用 `difflib.SequenceMatcher`（标准库），阈值 60%。
 
 ## 相关技能
 
