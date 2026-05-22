@@ -23,21 +23,6 @@ def get_date_range(days_offset=0):
     return date_str, f"{date_str}T00:00:00+08:00", f"{date_str}T23:59:59+08:00"
 
 
-def lark_calendar_agenda(start: str, end: str) -> list:
-    result = subprocess.run(
-        ["lark-cli", "calendar", "+agenda",
-         "--start", start, "--end", end, "--format", "json"],
-        capture_output=True, text=True
-    )
-    if result.returncode != 0:
-        return []
-    try:
-        data = json.loads(result.stdout)
-        return data if isinstance(data, list) else []
-    except json.JSONDecodeError:
-        return []
-
-
 def get_folder_token(folder_name: str, parent_token: str = None) -> str | None:
     params = {} if not parent_token else {"folder_token": parent_token}
     cmd = ["lark-cli", "drive", "files", "list",
@@ -127,28 +112,9 @@ def update_doc(doc_id: str, markdown: str):
     return result.returncode == 0
 
 
-def format_event_time(start_val: str) -> str:
-    if not start_val:
-        return ""
-    try:
-        dt = datetime.fromisoformat(start_val.replace("Z", "+00:00"))
-        return dt.strftime("%H:%M")
-    except ValueError:
-        return ""
-
-
-def build_markdown(date_str: str, events: list) -> str:
-    event_lines = []
-    if events:
-        for ev in events:
-            title = ev.get("summary") or ev.get("title") or "无标题"
-            time_str = format_event_time(ev.get("start") or "")
-            event_lines.append(f"- {time_str} {title}" if time_str else f"- {title}")
-
+def build_markdown(date_str: str) -> str:
     lines = [
-        f"# {date_str} 复盘总结",
-        "",
-        "## 📋 计划事项（必须）",
+        "## 📋 今日计划",
         "",
         "来源：昨日「明日待办」+ 今日新增计划",
         "",
@@ -156,13 +122,13 @@ def build_markdown(date_str: str, events: list) -> str:
         "|------|------|------|",
         "| - | - | - |",
         "",
-        "## ✅ 完成情况（必须）",
+        "## ✅ 今日完成",
         "",
         "| 完成 | 未完成 | 调整 |",
         "|------|--------|------|",
         "| - | - | - |",
         "",
-        "## ⏰ 明日待办（必须）",
+        "## ⏰ 明日待办",
         "",
         "| 时间 | 事项 | 备注 |",
         "|------|------|------|",
@@ -170,24 +136,20 @@ def build_markdown(date_str: str, events: list) -> str:
         "",
         "## 📌 待跟进",
         "",
-        "带紧迫度标注（🔴🟡🟢）",
+        "🔴 紧急  🟡 一般  🟢 缓办",
         "",
-        "## 📅 后续安排（建议）",
+        "## 📅 后续安排",
         "",
         "| 日期 | 事项 |",
         "|------|------|",
         "| - | - |",
         "",
-        "## 💡 今天学到的（建议）",
+        "## 💡 今日收获",
         "",
         "",
-        "## ⚡ 今日高光/感受（选填）",
+        "## ⚡ 今日感受",
         "",
     ]
-
-    if event_lines:
-        lines.extend(["", "---", "", "### 今日日历事件"])
-        lines.extend(event_lines)
 
     return "\n".join(lines)
 
@@ -212,12 +174,8 @@ def main():
                       or doc.get("document", {}).get("document_id"))
             break
 
-    # 获取日历参考
-    _, today_start, today_end = get_date_range(0)
-    events = lark_calendar_agenda(today_start, today_end)
-
     # 生成内容
-    markdown = build_markdown(date_str, events)
+    markdown = build_markdown(date_str)
 
     # 创建或更新文档
     if doc_id:
@@ -240,13 +198,6 @@ def main():
     # 输出摘要（供 deliver 使用）
     print(f"\n✅ {date_str} 复盘已完成")
     print(f"\n飞书文档已更新: {FEISHU_FOLDER}{date_str}-复盘总结")
-    if events:
-        print("\n今日日历参考:")
-        for ev in events:
-            title = ev.get("summary") or ev.get("title") or "无标题"
-            print(f"  • {title}")
-    else:
-        print("\n（今日无日历事件）")
 
 
 if __name__ == "__main__":
