@@ -367,9 +367,21 @@ def main():
         print("更新文档失败", file=sys.stderr)
         sys.exit(1)
 
-    print(f"文档已保存: {doc_id}", file=sys.stderr)
-    print(f"\n✅ {date_str} 复盘已完成")
-    print(f"\n飞书文档已更新: {FEISHU_FOLDER}{date_str}-复盘总结")
+    # stdout 推微信（简版），stderr 写日志
+    plan_count = len(today_plan)
+    done_count = len(today_done)
+    todo_count = len(tomorrow_todo)
+    cal_count = len(calendar_events)
+
+    summary = f"📋 今日计划 {plan_count} 项"
+    if done_count:
+        summary += f" | ✅ 完成 {done_count} 项"
+    if todo_count:
+        summary += f" | ⏰ 明日待办 {todo_count} 项"
+    if cal_count:
+        summary += f" | 📅 日程 {cal_count} 项"
+
+    print(f"\n✅ {date_str} 复盘已完成\n\n{summary}\n\n📄 完整内容：HermesAgent/每日复盘/{date_str}-复盘总结")
 
 
 if __name__ == "__main__":
