@@ -53,7 +53,12 @@ hermes-agent-playbook/
 │   │   └── scripts/daily_review.py
 │   └── friend-social-review/
 │       └── SKILL.md
-└── README.md
+├── 飞书/
+│   └── README.md
+├── 定时任务/
+│   └── README.md
+└── 用户规约/
+    └── README.md
 ```
 
 ---
