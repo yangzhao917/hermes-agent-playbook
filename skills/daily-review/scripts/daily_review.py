@@ -324,8 +324,6 @@ def build_markdown(date_str: str, tasks_data: tuple, calendar_events: list) -> s
         for t, name in calendar_events:
             lines.append(f"- {t} {name}")
 
-    lines.extend(["", "## 💡 今日收获", "", "## ⚡ 今日感受"])
-
     return "\n".join(lines)
 
 
