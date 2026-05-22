@@ -29,7 +29,6 @@ category: productivity
 **不负责：**
 - 日历操作 → 用 `lark-cli calendar`
 - 文档操作 → 用 `lark-cli docs`
-- 批量任务超 10 个 → 分批执行，每次不超过 10 个
 
 ## 依赖
 
