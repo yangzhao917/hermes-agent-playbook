@@ -76,16 +76,37 @@ def ensure_folder_structure() -> str | None:
     return daily_token
 
 
-def search_docs(query: str, folder_token: str = None) -> list:
-    cmd = ["lark-cli", "docs", "+search", "--query", query, "--format", "json"]
+def list_folder_files(folder_token: str) -> list:
+    """列出 folder 内的所有文件，返回包含 token/name/type/create_time 的列表。"""
+    params = {"folder_token": folder_token}
+    cmd = ["lark-cli", "drive", "files", "list",
+           "--params", json.dumps(params), "--format", "json"]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         return []
     try:
         data = json.loads(result.stdout)
-        return data if isinstance(data, list) else []
-    except json.JSONDecodeError:
+        return data.get("data", {}).get("files", [])
+    except (json.JSONDecodeError, KeyError):
         return []
+
+
+def find_doc_in_folder(folder_token: str, date_str: str) -> str | None:
+    """在指定 folder 内找当天日期的文档，按创建时间降序返回最新的 token。"""
+    files = list_folder_files(folder_token)
+    matches = []
+    for f in files:
+        if f.get("type") in ("docx", "doc"):
+            name = f.get("name", "")
+            if date_str in name:
+                # created_time 是 unix timestamp 字符串
+                ct = int(f.get("created_time", 0))
+                matches.append((ct, f.get("token"), name))
+    if not matches:
+        return None
+    # 按 created_time 降序，取最新的
+    matches.sort(key=lambda x: x[0], reverse=True)
+    return matches[0][1]
 
 
 def create_doc(title: str, folder_token: str) -> str | None:
@@ -164,15 +185,8 @@ def main():
         sys.exit(1)
     print(f"文件夹 token: {folder_token}", file=sys.stderr)
 
-    # 搜索当天文档
-    existing = search_docs(date_str, folder_token)
-    doc_id = None
-    for doc in existing:
-        title = doc.get("title", "")
-        if date_str in title:
-            doc_id = (doc.get("doc_id") or doc.get("document_id")
-                      or doc.get("document", {}).get("document_id"))
-            break
+    # 在目标 folder 内找当天文档（按创建时间降序取最新）
+    doc_id = find_doc_in_folder(folder_token, date_str)
 
     # 生成内容
     markdown = build_markdown(date_str)
