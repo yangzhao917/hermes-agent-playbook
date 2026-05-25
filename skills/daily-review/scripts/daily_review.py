@@ -1,268 +1,131 @@
 #!/usr/bin/env python3
 """
-每日复盘总结生成（完整版）
-- 从飞书任务拉今日到期/已完成/明日待办
-- 从飞书日历拉今日日程
-- 生成文档并覆盖
-依赖: lark-cli, feishu_calendar.py (OAuth user token)
+daily-review v2: 每日复盘总结
+- 微信版: 执行摘要（计划/完成/明日待办）
+- 飞书文档: 深度复盘（完整记录）
 """
+
 import subprocess
+import re
 import json
-import sys
-import os
-import urllib.request
 from datetime import datetime, timezone, timedelta
 
-FEISHU_FOLDER = "HermesAgent/每日复盘/"
-TOKEN_FILE = os.path.expanduser("~/.hermes/feishu_user_token.json")
+SH_TZ = timezone(timedelta(hours=8))
+CAL_LIST = "/home/ubuntu/.hermes/skills/productivity/feishu-calendar/scripts/list_events.py"
+TASK_LIST = "/home/ubuntu/.hermes/skills/productivity/feishu-task/scripts/list_tasks.py"
+DRIVE_LIST = "/home/ubuntu/.hermes/skills/productivity/feishu-calendar/scripts/list_events.py"  # placeholder
 
 
 def get_cst_now():
-    return datetime.now(timezone(timedelta(hours=8)))
+    return datetime.now(SH_TZ)
 
 
-def get_date_range(days_offset=0):
-    """返回 (date_str, start_iso, end_iso)，CST 时区。"""
-    dt = get_cst_now() + timedelta(days=days_offset)
-    date_str = dt.strftime("%Y-%m-%d")
-    return date_str, f"{date_str}T00:00:00+08:00", f"{date_str}T23:59:59+08:00"
+def get_review_date(date_arg=None):
+    """确定复盘日期：优先参数，其次今天"""
+    if date_arg:
+        return datetime.fromisoformat(date_arg).astimezone(SH_TZ)
+    return get_cst_now()
 
 
-# ─── 飞书任务 ───────────────────────────────────────────
-
-def get_tasks(completed: bool) -> list:
-    """获取任务列表。"""
-    params = {"page_size": 50, "completed": completed}
-    result = subprocess.run(
-        ["lark-cli", "task", "tasks", "list",
-         "--params", json.dumps(params), "--format", "json"],
-        capture_output=True, text=True
-    )
-    if result.returncode != 0:
-        return []
-    try:
-        data = json.loads(result.stdout)
-        if data.get("code") != 0:
-            return []
-        return data.get("data", {}).get("items", [])
-    except json.JSONDecodeError:
-        return []
-
-
-def format_task_time(ts_ms: int | None) -> str:
-    """毫秒时间戳 -> MM/DD"""
-    if not ts_ms:
-        return ""
-    dt = datetime.fromtimestamp(int(ts_ms) / 1000, tz=timezone(timedelta(hours=8)))
-    return dt.strftime("%m/%d")
-
-
-def get_today_tasks() -> tuple:
-    """返回 (今日计划, 今日完成, 明日待办, 待跟进) 四个列表，每个元素是 (时间, 事项, 备注)。"""
-    today = get_cst_now().strftime("%Y-%m-%d")
-    tomorrow = (get_cst_now() + timedelta(days=1)).strftime("%Y-%m-%d")
-    today_dt = get_cst_now().date()
-    tomorrow_dt = (get_cst_now() + timedelta(days=1)).date()
-
-    incomplete = get_tasks(False)
-    completed = get_tasks(True)
-
-    today_plan, today_done, tomorrow_todo = [], [], []
-
-    for t in incomplete:
-        due = t.get("due", {})
-        ts = due.get("timestamp") if due else None
-        if not ts:
-            continue
-        dt = datetime.fromtimestamp(int(ts) / 1000, tz=timezone(timedelta(hours=8))).date()
-        summary = t.get("summary", "无标题")
-        if dt == today_dt:
-            today_plan.append(("今日到期", summary, ""))
-        elif dt == tomorrow_dt:
-            tomorrow_todo.append(("明日到期", summary, ""))
-        elif dt > today_dt:
-            pass  # 跳过更远的
-
-    # 已完成任务中找今天完成的
-    done_summaries = set()
-    for t in completed:
-        due = t.get("due", {})
-        ts = due.get("timestamp") if due else None
-        if not ts:
-            continue
-        dt = datetime.fromtimestamp(int(ts) / 1000, tz=timezone(timedelta(hours=8))).date()
-        summary = t.get("summary", "无标题")
-        if dt == today_dt:
-            today_done.append(("今日完成", summary, ""))
-            done_summaries.add(summary)
-
-    # 待跟进：今日计划中未完成的任务
-    followup = [(time_label, summary, remark)
-                for time_label, summary, remark in today_plan
-                if summary not in done_summaries]
-
-    return today_plan, today_done, tomorrow_todo, followup
-
-
-# ─── 飞书日历 ───────────────────────────────────────────
-
-def get_access_token():
-    if not os.path.exists(TOKEN_FILE):
-        return None
-    with open(TOKEN_FILE) as f:
-        data = json.load(f)
-    return data.get("access_token", "")
-
-
-def get_primary_calendar_id(token: str) -> str | None:
-    req = urllib.request.Request(
-        "https://open.feishu.cn/open-apis/calendar/v4/calendars?page_size=50",
-        headers={"Authorization": f"Bearer {token}"}
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read())
-        for cal in data.get("data", {}).get("calendar_list", []):
-            if cal.get("type") == "primary":
-                return cal.get("calendar_id")
-    except Exception:
-        pass
-    return None
-
-
-def get_calendar_events(token: str, cal_id: str, date_str: str) -> list:
-    """返回 [(时间, 事项), ...]"""
-    dt = datetime.strptime(date_str, "%Y-%m-%d")
-    start_ts = int(datetime(dt.year, dt.month, dt.day, 0, 0, 0,
-                            tzinfo=timezone(timedelta(hours=8))).timestamp())
-    end_ts = int(datetime(dt.year, dt.month, dt.day, 23, 59, 59,
-                          tzinfo=timezone(timedelta(hours=8))).timestamp())
-    url = (f"https://open.feishu.cn/open-apis/calendar/v4/calendars/"
-           f"{urllib.request.quote(cal_id)}/events"
-           f"?page_size=50&start_time={start_ts}&end_time={end_ts}")
-    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
-    try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read())
-        return data.get("data", {}).get("items", [])
-    except Exception:
-        return []
-
-
-def format_event_time(ev: dict) -> str:
-    st = ev.get("start_time", {})
-    if "date" in st:
-        return st["date"]
-    ts = st.get("timestamp")
-    if ts:
-        dt = datetime.fromtimestamp(int(ts), tz=timezone(timedelta(hours=8)))
-        return dt.strftime("%H:%M")
-    return ""
-
-
-def get_today_calendar() -> list:
-    """返回 [(时间字符串, 事项), ...]"""
-    token = get_access_token()
-    if not token:
-        return []
-    cal_id = get_primary_calendar_id(token)
-    if not cal_id:
-        return []
-    date_str = get_cst_now().strftime("%Y-%m-%d")
-    events = get_calendar_events(token, cal_id, date_str)
-    result = []
-    for ev in events:
-        if ev.get("status") == "cancelled":
-            continue
-        t = format_event_time(ev)
-        name = ev.get("summary") or "无标题"
-        loc = ev.get("location", {}).get("location", "")
-        if loc:
-            name = f"{name} @{loc}"
-        result.append((t, name))
-    return result
-
-
-# ─── 飞书文档 ───────────────────────────────────────────
-
-def get_folder_token(folder_name: str, parent_token: str = None) -> str | None:
-    params = {} if not parent_token else {"folder_token": parent_token}
-    cmd = ["lark-cli", "drive", "files", "list",
-           "--params", json.dumps(params), "--format", "json"]
+def run_script(path, *args):
+    cmd = ["python3", path] + list(args)
     result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        return None
-    try:
-        data = json.loads(result.stdout)
-        for item in data.get("data", {}).get("files", []):
-            if item.get("name") == folder_name and item.get("type") == "folder":
-                return item.get("token")
-    except (json.JSONDecodeError, KeyError):
-        pass
-    return None
+    return result.stdout.strip()
 
 
-def create_folder(name: str, parent_token: str = None) -> str | None:
-    body = {"name": name, "folder_token": parent_token or ""}
-    cmd = ["lark-cli", "drive", "files", "create_folder",
-           "--data", json.dumps(body), "--format", "json"]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        return None
-    try:
-        data = json.loads(result.stdout)
-        return data.get("data", {}).get("file", {}).get("token")
-    except (json.JSONDecodeError, KeyError):
-        return None
+# ── 任务解析 ─────────────────────────────────────────────
 
+def fetch_today_done(today_mmdd=None):
+    """今日到期的已完成任务，返回 [summary, ...]"""
+    out = run_script(TASK_LIST, "--status", "done")
+    today = today_mmdd or get_cst_now().strftime("%m/%d")
+    results = []
+    for line in out.split("\n"):
+        line = line.strip()
+        if not line or line.startswith("✅") or "暂无" in line:
+            continue
+        # "  ✓ 标题  截止 MM/DD"
+        m = re.match(r"^✓\s+(.+?)\s+截止\s+(\d{2}/\d{2})$", line)
+        if m and m.group(2) == today:
+            results.append(m.group(1).strip())
+    return results
+
+
+def fetch_today_todo(today_mmdd=None):
+    """今日到期的未完成任务，返回 [summary, ...]"""
+    out = run_script(TASK_LIST, "--status", "todo")
+    today = today_mmdd or get_cst_now().strftime("%m/%d")
+    results = []
+    for line in out.split("\n"):
+        line = line.strip()
+        if not line or line.startswith("📋") or "暂无" in line:
+            continue
+        # "  ○ 标题  截止 MM/DD"
+        m = re.match(r"^○\s+(.+?)\s+截止\s+(\d{2}/\d{2})$", line)
+        if m and m.group(2) == today:
+            results.append(m.group(1).strip())
+    return results
+
+
+def fetch_tomorrow_todo(tomorrow_mmdd=None):
+    """明日到期的未完成任务，返回 [summary, ...]"""
+    out = run_script(TASK_LIST, "--status", "todo")
+    tomorrow = tomorrow_mmdd or (get_cst_now() + timedelta(days=1)).strftime("%m/%d")
+    results = []
+    for line in out.split("\n"):
+        line = line.strip()
+        if not line or line.startswith("📋") or "暂无" in line:
+            continue
+        m = re.match(r"^○\s+(.+?)\s+截止\s+(\d{2}/\d{2})$", line)
+        if m and m.group(2) == tomorrow:
+            results.append(m.group(1).strip())
+    return results
+
+
+# ── 日历解析 ─────────────────────────────────────────────
+
+def fetch_today_calendar(date_str):
+    """今日日历事件，返回 [(time_str, summary), ...]"""
+    out = run_script(CAL_LIST, "--date", date_str)
+    results = []
+    for line in out.split("\n"):
+        line = line.strip()
+        if not line or "暂无" in line:
+            continue
+        # "  05/22 16:20 ~ 05/22 19:23  标题"
+        m = re.match(
+            r"^\d{2}/\d{2}\s+(\d{2}:\d{2})\s+~\s+\d{2}/\d{2}\s+\d{2}:\d{2}\s+(.+)$",
+            line,
+        )
+        if m:
+            results.append((m.group(1), m.group(2).strip()))
+    return results
+
+
+# ── 飞书文档 ─────────────────────────────────────────────
 
 HERMES_PARENT_TOKEN = "nodcnu9wxEkxzgM53MYnlJXM4Kp"
 
 
-def ensure_folder_structure() -> str | None:
-    hermes_token = get_folder_token("HermesAgent", HERMES_PARENT_TOKEN)
-    if not hermes_token:
-        hermes_token = create_folder("HermesAgent", HERMES_PARENT_TOKEN)
-        if not hermes_token:
-            return None
-    daily_token = get_folder_token("每日复盘", hermes_token)
-    if not daily_token:
-        daily_token = create_folder("每日复盘", hermes_token)
-        if not daily_token:
-            return None
-    return daily_token
-
-
-def list_folder_files(folder_token: str) -> list:
+def find_doc(title, folder_token):
+    """在文件夹中查找同名文档，返回 doc_id 或 None"""
     params = {"folder_token": folder_token}
-    cmd = ["lark-cli", "drive", "files", "list",
-           "--params", json.dumps(params), "--format", "json"]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        return []
-    try:
-        data = json.loads(result.stdout)
-        return data.get("data", {}).get("files", [])
-    except (json.JSONDecodeError, KeyError):
-        return []
-
-
-def find_doc_in_folder(folder_token: str, date_str: str) -> str | None:
-    files = list_folder_files(folder_token)
-    matches = []
-    for f in files:
-        if f.get("type") in ("docx", "doc"):
-            name = f.get("name", "")
-            if date_str in name:
-                ct = int(f.get("created_time", 0))
-                matches.append((ct, f.get("token"), name))
-    if not matches:
+    result = subprocess.run(
+        ["lark-cli", "drive", "files", "list",
+         "--params", json.dumps(params), "--format", "json"],
+        capture_output=True, text=True
+    )
+    data = _parse_json(result.stdout)
+    if not data:
         return None
-    matches.sort(key=lambda x: x[0], reverse=True)
-    return matches[0][1]
+    for f in data.get("data", {}).get("files", []):
+        if f.get("name") == title and f.get("type") in ("docx", "doc"):
+            return f.get("token")
+    return None
 
 
-def create_doc(title: str, folder_token: str) -> str | None:
+def create_doc(title, folder_token):
+    """创建飞书文档，返回 doc_id 或 None"""
     result = subprocess.run(
         ["lark-cli", "docs", "+create",
          "--title", title, "--folder-token", folder_token, "--markdown", " "],
@@ -270,14 +133,14 @@ def create_doc(title: str, folder_token: str) -> str | None:
     )
     if result.returncode != 0:
         return None
-    try:
-        data = json.loads(result.stdout)
+    data = _parse_json(result.stdout)
+    if data:
         return data.get("data", {}).get("doc_id")
-    except (json.JSONDecodeError, KeyError):
-        return None
+    return None
 
 
-def update_doc(doc_id: str, markdown: str):
+def update_doc(doc_id, markdown):
+    """更新飞书文档内容"""
     result = subprocess.run(
         ["lark-cli", "docs", "+update",
          "--doc", doc_id, "--markdown", markdown, "--mode", "overwrite"],
@@ -286,142 +149,204 @@ def update_doc(doc_id: str, markdown: str):
     return result.returncode == 0
 
 
-# ─── Markdown 生成 ───────────────────────────────────────
+def _parse_json(stdout):
+    text = stdout.strip()
+    if not text:
+        return None
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    for line in text.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            brace_start = line.find("{")
+            if brace_start >= 0:
+                return json.loads(line[brace_start:])
+        except json.JSONDecodeError:
+            continue
+    return None
 
-def build_table(rows: list, cols: list) -> str:
-    """rows: [(cell, ...), ...]，cols: [列名, ...]"""
+
+def get_folder_token(folder_name, parent_token=None):
+    """获取或创建文件夹，返回 folder_token"""
+    params = {} if not parent_token else {"folder_token": parent_token}
+    result = subprocess.run(
+        ["lark-cli", "drive", "files", "list",
+         "--params", json.dumps(params), "--format", "json"],
+        capture_output=True, text=True
+    )
+    data = _parse_json(result.stdout)
+    if not data:
+        return None
+    for item in data.get("data", {}).get("files", []):
+        if item.get("name") == folder_name and item.get("type") == "folder":
+            return item.get("token")
+    # 不存在则创建
+    body = {"name": folder_name, "folder_token": parent_token or ""}
+    res = subprocess.run(
+        ["lark-cli", "drive", "files", "create_folder",
+         "--data", json.dumps(body), "--format", "json"],
+        capture_output=True, text=True
+    )
+    d = _parse_json(res.stdout)
+    if d:
+        return d.get("data", {}).get("file", {}).get("token")
+    return None
+
+
+def ensure_review_folder():
+    """确保 HermesAgent/每日复盘 文件夹存在，返回 folder_token"""
+    hermes_tok = get_folder_token("HermesAgent", HERMES_PARENT_TOKEN)
+    if not hermes_tok:
+        return None
+    daily_tok = get_folder_token("每日复盘", hermes_tok)
+    if not daily_tok:
+        return None
+    return daily_tok
+
+
+# ── Markdown 构建 ─────────────────────────────────────────
+
+def build_table(rows, cols):
     lines = ["| " + " | ".join(cols) + " |",
-             "|" + "|".join(["------"] * len(cols)) + "|"]
+             "|" + "|".join(["---"] * len(cols)) + "|"]
     for row in rows:
         cells = [str(c) if c else "-" for c in row]
         lines.append("| " + " | ".join(cells) + " |")
     return "\n".join(lines)
 
 
-def build_markdown(date_str: str, tasks_data: tuple, calendar_events: list) -> str:
-    today_plan, today_done, tomorrow_todo, followup = tasks_data
+def build_feishu_doc(date_str, done, tomorrow_todo, calendar_ev, review_date, harvest=None):
+    """构建飞书文档完整 Markdown"""
+    lines = [f"# {date_str} 总结", ""]
 
-    lines = []
-
-    # 📋 今日计划
-    if today_plan:
-        lines.extend(["## 📋 今日计划", "",
-                      "来源：昨日「明日待办」+ 今日新增计划", ""])
-        plan_rows = [(time_label, summary, remark or "-")
-                     for time_label, summary, remark in today_plan]
-        lines.append(build_table(plan_rows, ["时间", "事项", "备注"]))
-        lines.append("")
+    # 📍 今日日历
+    lines.append("## 📍 今日日历")
+    if calendar_ev:
+        for t, s in calendar_ev:
+            lines.append(f"- {t} {s}")
+    else:
+        lines.append("（暂无）")
+    lines.append("")
 
     # ✅ 今日完成
-    if today_done:
-        lines.extend(["## ✅ 今日完成", ""])
-        done_rows = [(summary, "-", "-") for _, summary, _ in today_done]
-        lines.append(build_table(done_rows, ["完成", "未完成", "调整"]))
-        lines.append("")
+    lines.append("## ✅ 今日完成")
+    if done:
+        for s in done:
+            lines.append(f"- {s}")
+    else:
+        lines.append("（暂无）")
+    lines.append("")
+
+    # 💡 今日收获
+    lines.append("## 💡 今日收获")
+    if harvest:
+        lines.append(harvest)
+    else:
+        lines.append("（暂无）")
+    lines.append("")
 
     # ⏰ 明日待办
+    lines.append("## ⏰ 明日待办")
     if tomorrow_todo:
-        lines.extend(["## ⏰ 明日待办", ""])
-        todo_rows = [(time_label, summary, remark or "-")
-                     for time_label, summary, remark in tomorrow_todo]
-        lines.append(build_table(todo_rows, ["时间", "事项", "备注"]))
-        lines.append("")
+        for s in tomorrow_todo:
+            lines.append(f"- {s}")
+    else:
+        lines.append("（暂无）")
+    lines.append("")
 
-    # 📌 待跟进
-    if followup:
-        lines.extend(["## 📌 待跟进", "", "🔴 紧急  🟡 一般  🟢 缓办", ""])
-        for time_label, summary, remark in followup:
-            lines.append(f"- {summary}")
-        lines.append("")
+    # 🔜 后续跟进
+    lines.append("## 🔜 后续跟进")
+    lines.append("（暂无）")
 
     return "\n".join(lines)
 
 
-# ─── 主流程 ─────────────────────────────────────────────
+def build_wechat_msg(date_str, done, today_todo, tomorrow_todo, doc_title, doc_url, review_date, calendar_ev):
+    """构建微信推送文本"""
+    day_names = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+    day_name = day_names[review_date.weekday()]
 
-def main():
-    date_str = get_cst_now().strftime("%Y-%m-%d")
-    print(f"正在生成 {date_str} 的复盘...", file=sys.stderr)
+    lines = [f"📌 {date_str} {day_name}（昨日）", ""]
 
-    folder_token = ensure_folder_structure()
-    if not folder_token:
-        print("无法获取文件夹，退出", file=sys.stderr)
-        sys.exit(1)
-
-    doc_id = find_doc_in_folder(folder_token, date_str)
-
-    # 拉取数据
-    print("拉取飞书任务...", file=sys.stderr)
-    tasks_data = get_today_tasks()
-    today_plan, today_done, tomorrow_todo, followup = tasks_data
-    print(f"  今日到期: {len(today_plan)}, 今日完成: {len(today_done)}, 明日到期: {len(tomorrow_todo)}, 待跟进: {len(followup)}", file=sys.stderr)
-
-    print("拉取飞书日历...", file=sys.stderr)
-    calendar_events = get_today_calendar()
-    print(f"  日历事件: {len(calendar_events)}", file=sys.stderr)
-
-    markdown = build_markdown(date_str, tasks_data, calendar_events)
-
-    if doc_id:
-        print(f"找到已有文档: {doc_id}，将覆盖内容", file=sys.stderr)
-    else:
-        doc_title = f"{date_str}-复盘总结"
-        doc_id = create_doc(doc_title, folder_token)
-        if not doc_id:
-            print("创建文档失败", file=sys.stderr)
-            sys.exit(1)
-        print(f"已创建新文档: {doc_id}", file=sys.stderr)
-
-    ok = update_doc(doc_id, markdown)
-    if not ok:
-        print("更新文档失败", file=sys.stderr)
-        sys.exit(1)
-
-    # stdout 推微信（简版），stderr 写日志
-    plan_count = len(today_plan)
-    done_count = len(today_done)
-    todo_count = len(tomorrow_todo)
-    cal_count = len(calendar_events)
-
-    lines_out = [f"✅ {date_str} 复盘", ""]
-
-    # 今日计划
-    lines_out.append("📋 今日计划")
-    if today_plan:
-        for _, summary, _ in today_plan:
-            lines_out.append(f"  ✗ {summary}")
-    else:
-        lines_out.append("  （暂无）")
-    lines_out.append("")
+    # 今日计划 = 日历事件 + 今日到期任务
+    lines.append("📍 昨日日程")
+    has_plan = False
+    if calendar_ev:
+        for t, s in calendar_ev:
+            lines.append(f"  📅 {t} {s}")
+            has_plan = True
+    if today_todo:
+        for s in today_todo:
+            lines.append(f"  📋 {s}")
+            has_plan = True
+    if not has_plan:
+        lines.append("  （暂无）")
+    lines.append("")
 
     # 今日完成
-    lines_out.append("✅ 今日完成")
-    if today_done:
-        for _, summary, _ in today_done:
-            lines_out.append(f"  ✓ {summary}")
+    lines.append("✅ 今日完成")
+    if done:
+        for s in done:
+            lines.append(f"  ✓ {s}")
     else:
-        lines_out.append("  （暂无）")
-    lines_out.append("")
+        lines.append("  （暂无）")
+    lines.append("")
 
     # 明日待办
-    lines_out.append("⏰ 明日待办")
+    lines.append("⏰ 明日待办")
     if tomorrow_todo:
-        for _, summary, _ in tomorrow_todo:
-            lines_out.append(f"  → {summary}")
+        for s in tomorrow_todo:
+            lines.append(f"  → {s}")
     else:
-        lines_out.append("  （暂无）")
-    lines_out.append("")
+        lines.append("  （暂无）")
+    lines.append("")
 
-    # 今日日程
-    if calendar_events:
-        lines_out.append("📅 今日日程")
-        for t, name in calendar_events:
-            lines_out.append(f"  {t} {name}")
-        lines_out.append("")
+    lines.append(f"📄 文档链接：[HermesAgent/每日复盘/{doc_title}]({doc_url})")
 
-    lines_out.append(f"📄 [{FEISHU_FOLDER}{date_str}-复盘总结](https://feishu.cn/docx/{doc_id})")
+    return "\n".join(lines)
 
-    print("\n".join(lines_out))
+
+# ── 主流程 ───────────────────────────────────────────────
+
+def main():
+    import argparse as _argparse
+    _parser = _argparse.ArgumentParser()
+    _parser.add_argument("--date", type=str, help="复盘日期 YYYY-MM-DD（默认昨天）")
+    _args, _ = _parser.parse_known_args()
+
+    review_date = get_review_date(_args.date)
+    date_str = review_date.strftime("%Y-%m-%d")
+    tomorrow_date = (review_date + timedelta(days=1)).strftime("%m/%d")
+    today_mmdd = review_date.strftime("%m/%d")
+
+    # 1. 拉数据
+    done = fetch_today_done(today_mmdd)
+    today_todo = fetch_today_todo(today_mmdd)
+    tomorrow_todo = fetch_tomorrow_todo(tomorrow_date)
+    calendar_ev = fetch_today_calendar(date_str)
+
+    # 2. 飞书文档（幂等：同日覆盖）
+    folder_tok = ensure_review_folder()
+    doc_title = f"{date_str}-每日复盘"
+    doc_url = ""
+
+    if folder_tok:
+        doc_id = find_doc(doc_title, folder_tok)
+        if not doc_id:
+            doc_id = create_doc(doc_title, folder_tok)
+        if doc_id:
+            markdown = build_feishu_doc(date_str, done,
+                                        tomorrow_todo, calendar_ev, review_date)
+            update_doc(doc_id, markdown)
+            doc_url = f"https://feishu.cn/docx/{doc_id}"
+
+    # 3. 微信推送（stdout）
+    wechat = build_wechat_msg(date_str, done, today_todo, tomorrow_todo, doc_title, doc_url, review_date, calendar_ev)
+    print(wechat)
 
 
 if __name__ == "__main__":

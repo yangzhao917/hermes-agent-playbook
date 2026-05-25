@@ -1,31 +1,44 @@
 #!/usr/bin/env python3
 """
-feishu-task: complete_task.py
-完成任务（用 +complete，不是 patch）
-- 成功返回 {"ok": true}，不是 {"code: 0}
+feishu-task: delete_task.py
+删除任务
+- 参数是 --params '{"task_guid":"..."}'，不是 --task-id
+- 必须加 --yes
 """
 
 import argparse
 import json
 import subprocess
 import sys
+import os
 
 
 def main():
-    parser = argparse.ArgumentParser(description="完成任务")
-    parser.add_argument("--task-id", required=True, help="任务 guid")
+    parser = argparse.ArgumentParser(description="删除任务")
+    parser.add_argument("--task-guid", required=True, help="任务 guid")
+    parser.add_argument("--yes", action="store_true", help="跳过确认")
     args = parser.parse_args()
 
-    cmd = ["lark-cli", "task", "+complete", "--task-id", args.task_id]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    raw = result.stdout + result.stderr
+    if not args.yes:
+        confirm = input(f"确认删除任务 {args.task_guid}？(y/N): ").strip().lower()
+        if confirm != "y":
+            print("已取消")
+            return
 
-    # 判断成功：{"ok": true}
-    data = _parse_json(raw)
-    if data and data.get("ok") is True:
-        print(f"✅ 任务已完成: {args.task-id}")
+    # lark-cli 要求 @file 必须是相对路径，写到当前目录
+    params_file = "./params_delete.json"
+    with open(params_file, "w") as f:
+        json.dump({"task_guid": args.task_guid}, f)
+
+    cmd = ["lark-cli", "task", "tasks", "delete", "--params", f"@{params_file}", "--yes"]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    os.remove(params_file)
+
+    data = _parse_json(result.stdout + result.stderr)
+    if data and data.get("code") == 0:
+        print("✅ 任务已删除")
     else:
-        print(f"❌ 完成任务失败: {data}", file=sys.stderr)
+        print(f"❌ 删除失败: {data}", file=sys.stderr)
         sys.exit(1)
 
 
