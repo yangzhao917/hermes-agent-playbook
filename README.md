@@ -21,8 +21,6 @@
 | Skill | 来源 | 描述 |
 |-------|------|------|
 | `lark-cli` | [nousresearch/hermes-agent](https://github.com/nousresearch/hermes-agent/tree/main/skills/lark-cli) | 飞书官方 CLI（日历/文档/云空间/任务） |
-| `feishu-task` | 自封装 | 飞书任务 CRUD + 批量完成 + 统计 |
-| `productivity/feishu` | 自封装 | 飞书深度集成（任务/日历/文档/审批） |
 | `just-one-api` | [justonevec/just-one-api](https://github.com/justonevec/just-one-api) | 小红书/抖音/微博数据搜索 |
 | `weread` | [weread](https://github.com/hermes-agent/weread) | 微信读书助手 |
 | `mmx-cli` | [mmx-cli](https://github.com/nousresearch/hermes-agent/tree/main/skills/mmx-cli) | MiniMax 文字/图片/视频/语音生成 |
