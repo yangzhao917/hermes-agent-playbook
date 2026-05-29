@@ -12,7 +12,7 @@ category: productivity
 - Product name: AgentOS
 - Local product repository: `~/.hermes/agent-os`
 - Legacy compatibility path: `~/.hermes/hermes-agent-playbook -> ~/.hermes/agent-os`
-- Remote: `https://github.com/yangzhao917/AgentOS`
+- Remote: `git@github.com:yangzhao917/agent-os.git`
 - Branch: `main`
 
 ## Source Of Truth

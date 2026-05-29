@@ -13,7 +13,7 @@ mappings:
     repo: modules/attention/skills/daily-review
   - runtime: weekly-review
     repo: modules/attention/skills/weekly-review
-  - runtime: productivity/hermes-agent-playbook
+  - runtime: productivity/agent-os-repo
     repo: modules/attention/skills/agent-os-repo
   - runtime: productivity/feishu-calendar
     repo: modules/execution/skills/feishu-calendar

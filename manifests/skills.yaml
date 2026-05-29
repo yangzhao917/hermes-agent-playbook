@@ -29,7 +29,7 @@ skills:
   - name: agent-os-repo
     role: attention
     ownership: agentos-owned
-    runtime_path: ~/.hermes/skills/productivity/hermes-agent-playbook
+    runtime_path: ~/.hermes/skills/productivity/agent-os-repo
     repo_path: modules/attention/skills/agent-os-repo
   - name: feishu-calendar
     role: execution
