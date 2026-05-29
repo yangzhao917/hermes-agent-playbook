@@ -39,6 +39,13 @@ HERMES_HOME=/home/ubuntu/.hermes
 
 每日和每周复盘脚本已在内部设置这个环境变量。
 
+## 专题运维文档
+
+- [网络与代理运维](network-and-proxy.md)：记录 WARP 等网络保障方案。
+- [模型 Provider 配置](model-provider-config.md)：记录 MiniMax / DeepSeek 主备模型配置和排障方法。
+
+Hermes 基础安装和通用配置以 Hermes 官方文档为准，不在 AgentOS 仓库内重复维护。
+
 ## 变更策略
 
 - 不提交 secrets、运行态 state、日志或个人 token。
