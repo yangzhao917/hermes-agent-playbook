@@ -1,0 +1,17 @@
+{
+  "note": "Example only. Real Hermes cron jobs live in ~/.hermes/cron/jobs.json and are not committed.",
+  "jobs": [
+    {
+      "name": "morning-reminder",
+      "script": "~/.hermes/scripts/morning_reminder.py"
+    },
+    {
+      "name": "daily-review",
+      "script": "~/.hermes/scripts/daily_review.py"
+    },
+    {
+      "name": "weekly-review",
+      "script": "~/.hermes/scripts/weekly_review.py"
+    }
+  ]
+}

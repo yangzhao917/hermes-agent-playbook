@@ -1,0 +1,94 @@
+version: 1
+updated_at: "2026-05-30"
+skills:
+  - name: mainline-governance
+    role: attention
+    ownership: agentos-owned
+    runtime_path: ~/.hermes/skills/mainline-governance
+    repo_path: modules/attention/skills/mainline-governance
+  - name: personal-os-roles
+    role: attention
+    ownership: agentos-owned
+    runtime_path: ~/.hermes/skills/personal-os-roles
+    repo_path: modules/attention/skills/personal-os-roles
+  - name: morning-reminder
+    role: attention
+    ownership: customized
+    runtime_path: ~/.hermes/skills/morning-reminder
+    repo_path: modules/attention/skills/morning-reminder
+  - name: daily-review
+    role: attention
+    ownership: agentos-owned
+    runtime_path: ~/.hermes/skills/daily-review
+    repo_path: modules/attention/skills/daily-review
+  - name: weekly-review
+    role: attention
+    ownership: agentos-owned
+    runtime_path: ~/.hermes/skills/weekly-review
+    repo_path: modules/attention/skills/weekly-review
+  - name: agent-os-repo
+    role: attention
+    ownership: agentos-owned
+    runtime_path: ~/.hermes/skills/productivity/hermes-agent-playbook
+    repo_path: modules/attention/skills/agent-os-repo
+  - name: feishu-calendar
+    role: execution
+    ownership: customized
+    runtime_path: ~/.hermes/skills/productivity/feishu-calendar
+    repo_path: modules/execution/skills/feishu-calendar
+  - name: feishu-task
+    role: execution
+    ownership: customized
+    runtime_path: ~/.hermes/skills/productivity/feishu-task
+    repo_path: modules/execution/skills/feishu-task
+  - name: lark-cli
+    role: knowledge
+    ownership: customized
+    runtime_path: ~/.hermes/skills/lark-cli
+    repo_path: modules/knowledge/skills/lark-cli
+  - name: weread
+    role: knowledge
+    ownership: external
+    runtime_path: ~/.hermes/skills/weread
+    repo_path: modules/knowledge/skills/weread
+  - name: ima-skill
+    role: knowledge
+    ownership: customized
+    runtime_path: ~/.hermes/skills/ima-skill
+    repo_path: modules/knowledge/skills/ima-skill
+  - name: web-search-ex-skill
+    role: discovery
+    ownership: customized
+    runtime_path: ~/.hermes/skills/web-search-ex-skill
+    repo_path: modules/discovery/skills/web-search-ex-skill
+  - name: wechat-official-content-search
+    role: discovery
+    ownership: customized
+    runtime_path: ~/.hermes/skills/wechat-official-content-search
+    repo_path: modules/discovery/skills/wechat-official-content-search
+  - name: xiaohongshu-justone-fallback
+    role: discovery
+    ownership: customized
+    runtime_path: ~/.hermes/skills/xiaohongshu-justone-fallback
+    repo_path: modules/discovery/skills/xiaohongshu-justone-fallback
+  - name: hackathon-activity-search
+    role: discovery
+    ownership: customized
+    runtime_path: ~/.hermes/skills/hackathon-activity-search
+    repo_path: modules/discovery/skills/hackathon-activity-search
+  - name: friend-social-review
+    role: personal
+    ownership: customized
+    runtime_path: ~/.hermes/skills/friend-social-review
+    repo_path: modules/personal/skills/friend-social-review
+  - name: memory-cleanup
+    role: personal
+    ownership: customized
+    runtime_path: ~/.hermes/skills/productivity/memory-cleanup
+    repo_path: modules/personal/skills/memory-cleanup
+  - name: just-one-api
+    role: vendor
+    ownership: external
+    runtime_path: null
+    repo_path: vendor/just-one-api
+    note: External API reference retained because discovery skills depend on Just One API.
