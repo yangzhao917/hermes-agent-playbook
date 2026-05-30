@@ -6,7 +6,7 @@ Vendor assets may be useful for runtime capability, integration reference, or fa
 
 Current vendor assets:
 
-- `agent-reach`
 - `humanize-zh`
-- `just-one-api`
 - `mmx-cli`
+
+已删除不可用 vendor：`agent-reach`, `just-one-api`。

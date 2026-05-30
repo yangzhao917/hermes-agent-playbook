@@ -1,39 +1,35 @@
 version: 1
-updated_at: "2026-05-30"
-runtime_root: "~/.hermes/skills"
-repo_root: "~/.hermes/agent-os"
+updated_at: '2026-05-30'
+runtime_root: ~/.hermes/skills
+repo_root: ~/.hermes/agent-os
 mappings:
-  - runtime: mainline-governance
-    repo: modules/attention/skills/mainline-governance
-  - runtime: personal-os-roles
-    repo: modules/attention/skills/personal-os-roles
-  - runtime: morning-reminder
-    repo: modules/attention/skills/morning-reminder
-  - runtime: daily-review
-    repo: modules/attention/skills/daily-review
-  - runtime: weekly-review
-    repo: modules/attention/skills/weekly-review
-  - runtime: productivity/agent-os-repo
-    repo: modules/attention/skills/agent-os-repo
-  - runtime: productivity/feishu-calendar
-    repo: modules/execution/skills/feishu-calendar
-  - runtime: productivity/feishu-task
-    repo: modules/execution/skills/feishu-task
-  - runtime: lark-cli
-    repo: modules/knowledge/skills/lark-cli
-  - runtime: weread
-    repo: modules/knowledge/skills/weread
-  - runtime: ima-skill
-    repo: modules/knowledge/skills/ima-skill
-  - runtime: web-search-ex-skill
-    repo: modules/discovery/skills/web-search-ex-skill
-  - runtime: wechat-official-content-search
-    repo: modules/discovery/skills/wechat-official-content-search
-  - runtime: xiaohongshu-justone-fallback
-    repo: modules/discovery/skills/xiaohongshu-justone-fallback
-  - runtime: hackathon-activity-search
-    repo: modules/discovery/skills/hackathon-activity-search
-  - runtime: friend-social-review
-    repo: modules/personal/skills/friend-social-review
-  - runtime: productivity/memory-cleanup
-    repo: modules/personal/skills/memory-cleanup
+- runtime: mainline-governance
+  repo: modules/attention/skills/mainline-governance
+- runtime: personal-os-roles
+  repo: modules/attention/skills/personal-os-roles
+- runtime: morning-reminder
+  repo: modules/attention/skills/morning-reminder
+- runtime: daily-review
+  repo: modules/attention/skills/daily-review
+- runtime: weekly-review
+  repo: modules/attention/skills/weekly-review
+- runtime: productivity/agent-os-repo
+  repo: modules/attention/skills/agent-os-repo
+- runtime: productivity/feishu-calendar
+  repo: modules/execution/skills/feishu-calendar
+- runtime: productivity/feishu-task
+  repo: modules/execution/skills/feishu-task
+- runtime: lark-cli
+  repo: modules/knowledge/skills/lark-cli
+- runtime: weread
+  repo: modules/knowledge/skills/weread
+- runtime: ima-skill
+  repo: modules/knowledge/skills/ima-skill
+- runtime: web-search-ex-skill
+  repo: modules/discovery/skills/web-search-ex-skill
+- runtime: hackathon-activity-search
+  repo: modules/discovery/skills/hackathon-activity-search
+- runtime: friend-social-review
+  repo: modules/personal/skills/friend-social-review
+- runtime: productivity/memory-cleanup
+  repo: modules/personal/skills/memory-cleanup

@@ -1,3 +1,5 @@
+<!-- 已删除的抓取工具：wechat-official-content-search、xiaohongshu-justone-fallback、agent-reach、just-one-api。不要按旧文档调用这些工具。 -->
+
 # 2026年6月中国黑客松活动参考
 
 > 本文档为 session 整理，非完整覆盖。按城市/时间分类，数据截至 2026-05-27。
@@ -83,8 +85,8 @@
 
 | 工具 | 状态 | 备注 |
 |------|------|------|
-| wechat-official-content-search（公众号） | ✅ 可用 | 搜索返回标题+摘要，正文需 article_detail |
-| xiaohongshu-justone-fallback（小红书） | ✅ 可用 | 需安装 pysocks |
+| wechat-official-content-search（公众号） | ❌ 已删除 | 搜索/正文读取不稳定，不能作为稳定数据源 |
+| xiaohongshu-justone-fallback（小红书） | ❌ 已删除 | 笔记搜索 V2/V3 返回 COLLECT FAILED |
 | xiaohongshu-info-search（Rnote） | ⚠️ 配额不足 | HTTP 402，需确认额度 |
 | web_search（DuckDuckGo） | ⚠️ 频繁超时 | 不稳定 |
 | web-search-ex-skill（Baidu） | ⚠️ 关键词飘移 | 专有名词结果不相关 |
@@ -97,7 +99,7 @@
 
 ### 微信文章读取
 - 直接访问 `mp.weixin.qq.com` → "环境异常"拦截
-- 正确方式：通过 `wechat-official-content-search` 的 `article_detail` action
+- 旧 `wechat-official-content-search` 已删除；不要再调用其 `article_detail` action
 - 公众号搜索结果只有标题+摘要，正文需单独拉取
 
 ### 搜索覆盖率说明

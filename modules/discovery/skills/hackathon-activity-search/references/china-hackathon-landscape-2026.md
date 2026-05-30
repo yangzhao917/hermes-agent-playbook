@@ -1,3 +1,5 @@
+<!-- 已删除的抓取工具：wechat-official-content-search、xiaohongshu-justone-fallback、agent-reach、just-one-api。不要按旧文档调用这些工具。 -->
+
 # 中国黑客松情报现场笔记（2026-05-27）
 
 ## 关键发现
@@ -54,11 +56,11 @@
 
 | 平台 | 工具 | 结果 |
 |------|------|------|
-| 微信文章详情 | Just One API (wechat-official) | ❌ 报"环境异常"验证码，无法读取正文 |
+| 微信文章详情 | 已删除 | ❌ 当前不可用，不能作为数据源 |
 | 微信文章详情 | Jina Reader (r.jina.ai) | ❌ 同样被拦截，返回空 |
 | 微信文章详情 | browser_navigate | ❌ 同样被拦截 |
 | 小红书站内 | Rnote API | ❌ 今日配额402超限 |
-| 小红书站内 | Just One (xiaohongshu-justone-fallback) | ⚠️ 需要proxy+socks才能稳定连接 |
+| 小红书站内 | 已删除 | ❌ 当前不可用，不能作为数据源 |
 | BuilderLab | browser_navigate + innerText | ✅ 无需登录，直接读 |
 | 公开网页 | DuckDuckGo web_search | ⚠️ 代理+socks5h可用但中文关键词飘移 |
 | 公开网页 | Baidu (via web-search-ex-skill) | ⚠️ 中文关键词容易飘移到百科/汉字解释 |
@@ -81,6 +83,6 @@ ALL_PROXY=socks5h://127.0.0.1:40000 python3 scripts/xxx.py
 
 1. **BuilderLab 是第一优先级** — 每次黑客松检索优先读这个源
 2. **微信文章正文无法读取** — 信息获取只能靠标题/摘要/公众号列表
-3. **Rnote配额每日限制** — 用 Just One API 作为备用并加 proxy 前缀
+3. **小红书站内检索缺口** — 旧 Just One / Rnote 路线已不可用，需要重新选型或配置登录态方案
 4. **"客松"系列关键词** — 搜"浙客松/冀客松/湘客松+黑客松"能挖到地域性活动
 5. **抖音AI创变者计划** — 是全国性系列活动，城市站正在巡回

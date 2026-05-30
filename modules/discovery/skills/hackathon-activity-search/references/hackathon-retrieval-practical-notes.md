@@ -1,12 +1,14 @@
+<!-- 已删除的抓取工具：wechat-official-content-search、xiaohongshu-justone-fallback、agent-reach、just-one-api。不要按旧文档调用这些工具。 -->
+
 # 黑客松活动检索经验（2026-05-27）
 
 ## 数据源现状
 
 | 数据源 | 搜索 | 详情读取 |
 |---|---|---|
-| 公众号（wechat-official-content-search） | ✅ 正常 | ⚠️ COLLECT FAILED |
+| 公众号（wechat-official-content-search） | ❌ 已删除 | 搜索返回 COLLECT FAILED，不能作为稳定数据源 |
 | 小红书（Rnote） | ❌ 额度耗尽，已删 | — |
-| 小红书（Just One） | ❌ 上游失败 | — |
+| 小红书（Just One） | ❌ 已删除 | 笔记搜索 V2/V3 返回 COLLECT FAILED |
 
 **结论**：公众号搜索是当前唯一可靠的黑客松情报源。
 
