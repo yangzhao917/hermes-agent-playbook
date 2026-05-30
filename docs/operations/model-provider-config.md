@@ -16,6 +16,28 @@ MiniMax 国际版和中国版的 provider、base URL 和环境变量不同，配
 | MiniMax 中国版 | `minimax-cn` | `https://api.minimaxi.com/v1` | `MINIMAX_CN_API_KEY` |
 | DeepSeek | `deepseek` | `https://api.deepseek.com/v1` | `DEEPSEEK_API_KEY` |
 
+## MiniMax 中国版协议模式
+
+MiniMax 中国版当前应走 OpenAI-compatible Chat Completions 协议。Hermes 配置里必须明确使用：
+
+```yaml
+model:
+  default: MiniMax-M2.7
+  provider: minimax-cn
+  base_url: https://api.minimaxi.com/v1
+  api_mode: chat_completions
+```
+
+不要把 `minimax-cn` 配成 `api_mode: anthropic_messages`。该模式会请求 `/v1/messages`，当前会返回 `HTTP 404: 404 page not found`。正确路径是 `/v1/chat/completions`。
+
+验证协议是否正确：
+
+```bash
+curl -sS https://api.minimaxi.com/v1/models >/dev/null
+# Hermes 主模型验证：
+hermes chat -q "只回复：OK" --quiet
+```
+
 ## 推荐运行策略
 
 AgentOS 推荐采用主备模型策略：
@@ -41,6 +63,7 @@ model:
   default: MiniMax-M2.7
   provider: minimax-cn
   base_url: https://api.minimaxi.com/v1
+  api_mode: chat_completions
 
 providers:
   minimax-cn:
